@@ -66,10 +66,6 @@ jobs:
       matrix:
         # list whatever Terraform versions here you would like to support
         terraform:
-          - '0.12.*'
-          - '0.13.*'
-          - '0.14.*'
-          - '0.15.*'
           - '1.0.*'
           - '1.1.*'
           - '1.2.*'
@@ -98,11 +94,8 @@ jobs:
       timeout-minutes: 10
       env:
         TF_ACC: "1"
-
-        # Set whatever additional acceptance test env vars here. You can
-        # optionally use data from your repository secrets using the
-        # following syntax:
-        # SOME_VAR: ${{ secrets.SOME_VAR }}
+        NFTOWER_API_KEY: ${{ secrets.NFTOWER_ACC_API_KEY }}
+        NFTOWER_ORGANIZATION: healx-tf-acc
 
       run: |
         go test -v -cover ./internal/provider/
