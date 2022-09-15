@@ -23,6 +23,10 @@ func TestProvider(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
+	if v := os.Getenv("TF_ACC"); v != "1" {
+		t.Skip("TF_ACC=1 must be set to run acceptance tests")
+	}
+
 	if v := os.Getenv("NFTOWER_API_KEY"); v == "" {
 		t.Fatal("NFTOWER_API_KEY must be set for acceptance tests")
 	}
