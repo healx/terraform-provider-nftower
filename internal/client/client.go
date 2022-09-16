@@ -8,8 +8,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"time"
+	"strings"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -18,19 +19,39 @@ type TowerClient struct {
 	apiKey    string
 	apiUrl    *url.URL
 	orgId     int64
-	http      *http.Client
+	http      *retryablehttp.Client
 }
 
 func NewTowerClient(ctx context.Context, userAgent string, apiKey string, apiUrl string, org string) (*TowerClient, error) {
 	u, _ := url.Parse(apiUrl)
+
+	httpClient := retryablehttp.NewClient()
+	httpClient.Logger = nil
+	httpClient.RequestLogHook = (func(_ retryablehttp.Logger, req *http.Request, attempt int) {
+		var body string = formatRequestBody(req)
+		tflog.Trace(
+			req.Context(),
+			fmt.Sprintf("[%s] %s\n%s\n%s\n",
+				req.Method,
+				req.URL,
+				formatHeaders(req.Header),
+				body))
+	})
+	httpClient.ResponseLogHook = (func(_ retryablehttp.Logger, resp *http.Response) {
+		var body string = formatResponseBody(resp)
+		tflog.Trace(
+			resp.Request.Context(),
+			fmt.Sprintf("[%d] %s\n%s\n%s\n",
+				resp.StatusCode,
+				resp.Request.URL,
+				formatHeaders(resp.Header), body))
+	})
+
 	c := &TowerClient{
 		userAgent: userAgent,
 		apiKey:    apiKey,
 		apiUrl:    u.ResolveReference(&url.URL{Path: "/"}),
-		http: &http.Client{
-			Timeout:   30 * time.Second,
-			Transport: &transport{},
-		},
+		http:      httpClient,
 	}
 
 	orgId, err := c.getOrgIdFromName(ctx, org)
@@ -77,12 +98,17 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 
 	var querystring string = ""
 	if query != nil {
-		for k,v := range query {
+		for k, v := range query {
 			querystring += fmt.Sprintf("%s=%s", k, url.QueryEscape(v))
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, c.apiUrl.ResolveReference(&url.URL{Path: path, RawQuery: querystring}).String(), r)
+	req, err := retryablehttp.NewRequestWithContext(
+		ctx,
+		method,
+		c.apiUrl.ResolveReference(&url.URL{Path: path, RawQuery: querystring}).String(),
+		r)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,4 +146,59 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 	}
 
 	return resp, nil
+}
+
+func formatRequestBody(req *http.Request) string {
+	if req.Body == nil {
+		return ""
+	}
+
+	b, err := io.ReadAll(req.Body)
+	if err != nil {
+		return ""
+	}
+
+	req.Body = io.NopCloser(bytes.NewReader(b))
+
+	return formatBody(b, req.Header.Get("Content-Type") == "application/json")
+}
+
+func formatResponseBody(res *http.Response) string {
+	if res.Body == nil {
+		return ""
+	}
+
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return ""
+	}
+
+	res.Body = io.NopCloser(bytes.NewReader(b))
+
+	return formatBody(b, res.Header.Get("Content-Type") == "application/json")
+}
+
+func formatBody(body []byte, isJson bool) string {
+	if !isJson {
+		return string(body)
+	}
+
+	var prettyJSON bytes.Buffer
+	err := json.Indent(&prettyJSON, body, "", "\t")
+	if err == nil {
+		return string(prettyJSON.Bytes())
+	} else {
+		return string(body)
+	}
+}
+
+func formatHeaders(header http.Header) string {
+	var strHeaders string = ""
+	for k, v := range header {
+		if k == "Authorization" {
+			continue
+		}
+		strHeaders += fmt.Sprintf("%s: %s\n", k, strings.Join(v, ", "))
+	}
+	return strHeaders
 }
