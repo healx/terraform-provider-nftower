@@ -26,10 +26,6 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 
 	participantId := int64(participant["participantId"].(float64))
 
-	if role == "launch" {
-		return participantId, participant["email"].(string), nil
-	}
-
 	err = c.UpdateWorkspaceParticipantRole(ctx, workspaceId, participantId, role)
 
 	return participantId, participant["email"].(string), err

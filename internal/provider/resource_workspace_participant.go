@@ -37,7 +37,7 @@ func resourceWorkspaceParticipant() *schema.Resource {
 				Description: "The role of the participant.",
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "launch",
+				Default:     "view",
 				ValidateFunc: validation.StringInSlice(
 					[]string{"owner", "admin", "maintain", "launch", "view"},
 					false),

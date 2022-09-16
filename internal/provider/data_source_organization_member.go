@@ -18,7 +18,7 @@ func dataSourceOrganizationMember() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"email": {
-				Description: "The email address of the user to add.",
+				Description: "The email address of the member.",
 				Type:        schema.TypeString,
 				Required:    true,
 			},

@@ -19,7 +19,7 @@ func TestAccDataSourceWorkspaceParticipant(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
 					resource.TestCheckResourceAttr(
-						"nftower_workspace_participant.foo", "role", "launch"),
+						"nftower_workspace_participant.foo", "role", "view"),
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "member_id", regexp.MustCompile("^[0-9]+$")),
 				),

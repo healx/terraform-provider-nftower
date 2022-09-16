@@ -20,7 +20,7 @@ func TestAccResourceWorkspaceParticipant(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
 					resource.TestCheckResourceAttr(
-						"nftower_workspace_participant.foo", "role", "launch"),
+						"nftower_workspace_participant.foo", "role", "view"),
 				),
 			},
 		},

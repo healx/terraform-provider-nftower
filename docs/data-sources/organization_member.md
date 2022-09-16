@@ -17,7 +17,7 @@ A member of a tower organization.
 
 ### Required
 
-- `email` (String) The email address of the user to add.
+- `email` (String) The email address of the member.
 
 ### Read-Only
 
