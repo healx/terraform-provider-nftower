@@ -39,15 +39,18 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"nftower_workspace":           dataSourceWorkspace(),
-				"nftower_compute_environment": dataSourceComputeEnv(),
-				"nftower_credentials":         dataSourceCredentials(),
+				"nftower_workspace":             dataSourceWorkspace(),
+				"nftower_compute_environment":   dataSourceComputeEnv(),
+				"nftower_credentials":           dataSourceCredentials(),
+				"nftower_organization_member":   dataSourceOrganizationMember(),
+				"nftower_workspace_participant": dataSourceWorkspaceParticipant(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"nftower_workspace":           resourceWorkspace(),
-				"nftower_compute_environment": resourceComputeEnvironment(),
-				"nftower_credentials":         resourceCredentials(),
-				"nftower_organization_member": resourceOrganizationMember(),
+				"nftower_workspace":             resourceWorkspace(),
+				"nftower_compute_environment":   resourceComputeEnvironment(),
+				"nftower_credentials":           resourceCredentials(),
+				"nftower_organization_member":   resourceOrganizationMember(),
+				"nftower_workspace_participant": resourceWorkspaceParticipant(),
 			},
 		}
 

@@ -26,10 +26,6 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 
 	memberId := int64(member["memberId"].(float64))
 
-	if role == "member" {
-		return memberId, nil
-	}
-
 	err = c.UpdateOrganizationMemberRole(ctx, memberId, role)
 
 	return int64(member["memberId"].(float64)), err
