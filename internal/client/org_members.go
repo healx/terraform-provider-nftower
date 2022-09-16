@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string) (int64, error) {
+func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string, role string) (int64, error) {
 
 	payload := map[string]interface{}{
 		"user": email,
@@ -24,7 +24,29 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 	memberObj := res.(map[string]interface{})
 	member := memberObj["member"].(map[string]interface{})
 
-	return int64(member["memberId"].(float64)), nil
+	memberId := int64(member["memberId"].(float64))
+
+	if role == "member" {
+		return memberId, nil
+	}
+
+	err = c.UpdateOrganizationMemberRole(ctx, memberId, role)
+
+	return int64(member["memberId"].(float64)), err
+}
+
+func (c *TowerClient) UpdateOrganizationMemberRole(ctx context.Context, id int64, role string) error {
+	payload := map[string]interface{}{
+		"role": role,
+	}
+
+	_, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/%d/role", c.orgId, id), nil, payload)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *TowerClient) GetOrganizationMember(ctx context.Context, email string) (map[string]interface{}, error) {
@@ -35,7 +57,7 @@ func (c *TowerClient) GetOrganizationMember(ctx context.Context, email string) (
 	}
 
 	members := res.(map[string]interface{})
-	
+
 	if int64(members["totalSize"].(float64)) == 0 {
 		return nil, fmt.Errorf("Could not find a member with email %s", email)
 	}

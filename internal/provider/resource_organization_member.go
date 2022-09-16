@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/healx/terraform-provider-nftower/internal/client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceOrganizationMember() *schema.Resource {
@@ -17,6 +18,7 @@ func resourceOrganizationMember() *schema.Resource {
 
 		CreateContext: resourceOrganizationMemberCreate,
 		ReadContext:   resourceOrganizationMemberRead,
+		UpdateContext: resourceOrganizationMemberUpdate,
 		DeleteContext: resourceOrganizationMemberDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -25,6 +27,13 @@ func resourceOrganizationMember() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
+			},
+			"role": {
+				Description: "The role of the member. Can be owner or member",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "member",
+				ValidateFunc: validation.StringInSlice([]string{"member", "owner"}, false),
 			},
 			"first_name": {
 				Description: "The first name of the member.",
@@ -41,11 +50,6 @@ func resourceOrganizationMember() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
-			"role": {
-				Description: "The role of the member. Can be owner or member",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
 		},
 	}
 }
@@ -56,6 +60,7 @@ func resourceOrganizationMemberCreate(ctx context.Context, d *schema.ResourceDat
 	id, err := client.CreateOrganizationMember(
 		ctx,
 		d.Get("email").(string),
+		d.Get("role").(string),
 	)
 
 	if err != nil {
@@ -91,6 +96,19 @@ func resourceOrganizationMemberRead(ctx context.Context, d *schema.ResourceData,
 	d.Set("role", member["role"].(string))
 
 	return nil
+}
+
+func resourceOrganizationMemberUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	client := meta.(*client.TowerClient)
+
+	memberId, _ := strconv.ParseInt(d.Id(), 10, 64)
+	err := client.UpdateOrganizationMemberRole(ctx, memberId, d.Get("role").(string))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceOrganizationMemberRead(ctx, d, meta)
 }
 
 func resourceOrganizationMemberDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
