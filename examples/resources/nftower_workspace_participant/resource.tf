@@ -1,0 +1,16 @@
+resource "nftower_organization_member" "example" {
+  email = "myuser@domain.com"
+}
+
+resource "nftower_workspace" "example" {
+  name        = "foo"
+  full_name   = "foo bar baz"
+  description = "A foo workspace"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_workspace_participant" "example" {
+  workspace_id = nftower_workspace.example.id
+  member_id    = nftower_organization_member.example.id
+  role         = "maintain"
+}
