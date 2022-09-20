@@ -1,19 +1,8 @@
-# Terraform Provider Scaffolding (Terraform Plugin SDK)
+# Nextflow Tower terraform provider
 
-_This template repository is built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk). The template repository built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework) can be found at [terraform-provider-nftower-framework](https://github.com/hashicorp/terraform-provider-nftower-framework). See [Which SDK Should I Use?](https://www.terraform.io/docs/plugin/which-sdk.html) in the Terraform documentation for additional information._
+This provider manages configuration for Sequera's [Nextflow Tower](https://tower.nf/) product. It has been tested using the SaaS version.
 
-This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
-
- - A resource, and a data source (`internal/provider/`),
- - Examples (`examples/`) and generated documentation (`docs/`),
- - Miscellaneous meta files.
- 
-These files contain boilerplate code that you will need to edit to create your own Terraform provider. Tutorials for creating Terraform providers can be found on the [HashiCorp Learn](https://learn.hashicorp.com/collections/terraform/providers) platform.
-
-Please see the [GitHub template repository documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) for how to create a new repository from this template on GitHub.
-
-Once you've written your provider, you'll want to [publish it on the Terraform Registry](https://www.terraform.io/docs/registry/providers/publishing.html) so that others can use it.
-
+For detailed documentation see the [registry page](https://registry.terraform.io/providers/healx/nftower).
 
 ## Requirements
 
@@ -45,7 +34,12 @@ Then commit the changes to `go.mod` and `go.sum`.
 
 ## Using the provider
 
-Fill this in for each provider
+```hcl
+provider "nftower" {
+  api_key      = "..." // can also be set using NFTOWER_API_KEY
+  organization = "my-org"
+}
+```
 
 ## Developing the Provider
 
@@ -55,10 +49,19 @@ To compile the provider, run `go install`. This will build the provider and put 
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of Acceptance tests, run `make testacc`. You will need to specify an api key using `NFTOWER_API_KEY` and an organization using `NFTOWER_ORGANIZATION`
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
 ```sh
 $ make testacc
+```
+
+## Making a release
+
+If you wish to make a release, you must tag a commit with the version you wish to release and then push the tag to Github. A Github action will trigger to create the release and then the terraform registry will detect it and update.
+
+```
+git tag v1.2.3
+git push origin v1.2.3
 ```
