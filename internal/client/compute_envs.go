@@ -53,7 +53,7 @@ func (c *TowerClient) CreateAWSBatchComputeEnv(
 }
 
 func (c *TowerClient) createComputeEnv(ctx context.Context, workspaceId string, payload map[string]interface{}) (string, error) {
-	res, err := c.request(ctx, "POST", "/compute-envs", map[string]string{"workspaceId": workspaceId}, payload)
+	res, err := c.requestWithJsonPayload(ctx, "POST", "/compute-envs", map[string]string{"workspaceId": workspaceId}, payload)
 
 	if err != nil {
 		return "", err
@@ -69,7 +69,7 @@ func (c *TowerClient) createComputeEnv(ctx context.Context, workspaceId string, 
 }
 
 func (c *TowerClient) GetComputeEnv(ctx context.Context, workspaceId string, id string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/compute-envs/%s", id), map[string]string{"workspaceId": workspaceId}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/compute-envs/%s", id), map[string]string{"workspaceId": workspaceId})
 
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (c *TowerClient) GetComputeEnv(ctx context.Context, workspaceId string, id 
 }
 
 func (c *TowerClient) GetComputeEnvByName(ctx context.Context, workspaceId string, name string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", "/compute-envs", map[string]string{"workspaceId": workspaceId}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", "/compute-envs", map[string]string{"workspaceId": workspaceId})
 
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (c *TowerClient) GetComputeEnvByName(ctx context.Context, workspaceId strin
 }
 
 func (c *TowerClient) DeleteComputeEnv(ctx context.Context, workspaceId string, id string) error {
-	_, err := c.request(ctx, "DELETE", fmt.Sprintf("/compute-envs/%s", id), map[string]string{"workspaceId": workspaceId}, nil)
+	_, err := c.requestWithoutPayload(ctx, "DELETE", fmt.Sprintf("/compute-envs/%s", id), map[string]string{"workspaceId": workspaceId})
 	return err
 }
 

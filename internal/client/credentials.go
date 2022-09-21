@@ -56,7 +56,7 @@ func (c *TowerClient) CreateCredentialsGithub(
 }
 
 func (c *TowerClient) createCredentials(ctx context.Context, workspaceId string, payload map[string]interface{}) (string, error) {
-	res, err := c.request(ctx, "POST", "/credentials", map[string]string{"workspaceId": workspaceId}, payload)
+	res, err := c.requestWithJsonPayload(ctx, "POST", "/credentials", map[string]string{"workspaceId": workspaceId}, payload)
 
 	if err != nil {
 		return "", err
@@ -72,7 +72,7 @@ func (c *TowerClient) createCredentials(ctx context.Context, workspaceId string,
 }
 
 func (c *TowerClient) GetCredentialsByName(ctx context.Context, workspaceId string, name string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", "/credentials", map[string]string{"workspaceId": workspaceId}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", "/credentials", map[string]string{"workspaceId": workspaceId})
 
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (c *TowerClient) GetCredentialsByName(ctx context.Context, workspaceId stri
 }
 
 func (c *TowerClient) GetCredentials(ctx context.Context, workspaceId string, id string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId})
 
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func (c *TowerClient) GetCredentials(ctx context.Context, workspaceId string, id
 }
 
 func (c *TowerClient) DeleteCredentials(ctx context.Context, workspaceId string, id string) error {
-	_, err := c.request(ctx, "DELETE", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId}, nil)
+	_, err := c.requestWithoutPayload(ctx, "DELETE", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId})
 	return err
 }
 
@@ -158,10 +158,6 @@ func (c *TowerClient) UpdateCredentialsGithub(
 }
 
 func (c *TowerClient) updateCredentials(ctx context.Context, id string, workspaceId string, payload map[string]interface{}) error {
-	_, err := c.request(ctx, "PUT", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
-
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
+	return err
 }
