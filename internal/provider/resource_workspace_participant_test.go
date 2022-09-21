@@ -8,14 +8,14 @@ import (
 	"github.com/healx/terraform-provider-nftower/internal/template"
 )
 
-func TestAccResourceWorkspaceParticipant(t *testing.T) {
+func TestAccResourceWorkspaceParticipant_basic(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
 				ResourceName: "nftower_workspace_participant",
-				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant),
+				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant_basic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
@@ -27,7 +27,7 @@ func TestAccResourceWorkspaceParticipant(t *testing.T) {
 	})
 }
 
-const testAccResourceWorkspaceParticipant = `
+const testAccResourceWorkspaceParticipant_basic = `
 resource "nftower_organization_member" "foo" {
   email = "tf-acceptance-{{.randName}}@example.com"
 }
@@ -45,14 +45,53 @@ resource "nftower_workspace_participant" "foo" {
 }
 `
 
-func TestAccResourceWorkspaceParticipantMaintain(t *testing.T) {
+func TestAccResourceWorkspaceParticipant_email(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
 				ResourceName: "nftower_workspace_participant",
-				Config:       template.ParseRandName(testAccResourceWorkspaceParticipantMaintain),
+				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant_email),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr(
+						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
+						resource.TestMatchResourceAttr(
+							"nftower_workspace_participant.foo", "member_id", regexp.MustCompile("^[0-9]+$")),
+					resource.TestCheckResourceAttr(
+						"nftower_workspace_participant.foo", "role", "view"),
+				),
+			},
+		},
+	})
+}
+
+const testAccResourceWorkspaceParticipant_email = `
+resource "nftower_organization_member" "foo" {
+  email = "tf-acceptance-{{.randName}}@example.com"
+}
+
+resource "nftower_workspace" "foo" {
+  name        = "tf-acceptance-{{.randName}}"
+  full_name   = "tf acceptance testing workspace"
+  description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_workspace_participant" "foo" {
+  workspace_id = nftower_workspace.foo.id
+  email = nftower_organization_member.foo.email
+}
+`
+
+func TestAccResourceWorkspaceParticipant_maintain(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				ResourceName: "nftower_workspace_participant",
+				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant_maintain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
@@ -64,7 +103,7 @@ func TestAccResourceWorkspaceParticipantMaintain(t *testing.T) {
 	})
 }
 
-const testAccResourceWorkspaceParticipantMaintain = `
+const testAccResourceWorkspaceParticipant_maintain = `
 resource "nftower_organization_member" "foo" {
   email = "tf-acceptance-{{.randName}}@example.com"
 }
@@ -83,14 +122,14 @@ resource "nftower_workspace_participant" "foo" {
 }
 `
 
-func TestAccResourceWorkspaceParticipantUpdateRole(t *testing.T) {
+func TestAccResourceWorkspaceParticipant_updateRole(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
 				ResourceName: "nftower_workspace_participant",
-				Config:       template.ParseRandName(testAccResourceWorkspaceParticipantUpdateRole_1),
+				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant_updateRole_1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"nftower_workspace_participant.foo", "email", regexp.MustCompile("^tf-acceptance-[0-9]+@example.com")),
@@ -100,7 +139,7 @@ func TestAccResourceWorkspaceParticipantUpdateRole(t *testing.T) {
 			},
 			{
 				ResourceName: "nftower_workspace_participant",
-				Config:       template.ParseRandName(testAccResourceWorkspaceParticipantUpdateRole_2),
+				Config:       template.ParseRandName(testAccResourceWorkspaceParticipant_updateRole_2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"nftower_workspace_participant.foo", "role", "maintain"),
@@ -110,7 +149,7 @@ func TestAccResourceWorkspaceParticipantUpdateRole(t *testing.T) {
 	})
 }
 
-const testAccResourceWorkspaceParticipantUpdateRole_1 = `
+const testAccResourceWorkspaceParticipant_updateRole_1 = `
 resource "nftower_organization_member" "foo" {
   email = "tf-acceptance-{{.randName}}@example.com"
 }
@@ -129,7 +168,7 @@ resource "nftower_workspace_participant" "foo" {
 }
 `
 
-const testAccResourceWorkspaceParticipantUpdateRole_2 = `
+const testAccResourceWorkspaceParticipant_updateRole_2 = `
 resource "nftower_organization_member" "foo" {
   email = "tf-acceptance-{{.randName}}@example.com"
 }
