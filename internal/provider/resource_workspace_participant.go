@@ -13,7 +13,7 @@ import (
 
 func resourceWorkspaceParticipant() *schema.Resource {
 	return &schema.Resource{
-		Description: "Grants access to a tower workspace.",
+		Description: "Grants access to a tower workspace. The member must already be added to the organization.",
 
 		CreateContext: resourceWorkspaceParticipantCreate,
 		ReadContext:   resourceWorkspaceParticipantRead,
@@ -28,10 +28,20 @@ func resourceWorkspaceParticipant() *schema.Resource {
 				ForceNew:    true,
 			},
 			"member_id": {
-				Description: "The id of the member in the organization.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Description:   "The id of the member in the organization. Specify either member_id or email but not both.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"email"},
+			},
+			"email": {
+				Description:   "The email of the member. Specify either member_id or email but not both.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"member_id"},
 			},
 			"role": {
 				Description: "The role of the participant.",
@@ -52,11 +62,6 @@ func resourceWorkspaceParticipant() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
-			"email": {
-				Description: "The email of the member.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
 		},
 	}
 }
@@ -64,7 +69,31 @@ func resourceWorkspaceParticipant() *schema.Resource {
 func resourceWorkspaceParticipantCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*client.TowerClient)
 
-	memberId, _ := strconv.ParseInt(d.Get("member_id").(string), 10, 64)
+	var memberId int64
+
+	if v, ok := d.GetOk("member_id"); ok {
+		id, err := strconv.ParseInt(v.(string), 10, 64)
+		memberId = id
+
+		if err != nil {
+			return diag.Errorf("member_id must be a number, got %s", v.(string))
+		}
+	}
+
+	if v, ok := d.GetOk("email"); ok {
+		email := v.(string)
+		member, err := client.GetOrganizationMember(ctx, email)
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		memberId = int64(member["memberId"].(float64))
+	}
+
+	if memberId == 0 {
+		return diag.Errorf("either member_id or email must be specified.")
+	}
 
 	id, email, err := client.CreateWorkspaceParticipant(
 		ctx,
@@ -79,6 +108,7 @@ func resourceWorkspaceParticipantCreate(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(fmt.Sprintf("%d", id))
 	d.Set("email", email)
+	d.Set("member_id", fmt.Sprintf("%d", memberId))
 
 	return resourceWorkspaceParticipantRead(ctx, d, meta)
 }

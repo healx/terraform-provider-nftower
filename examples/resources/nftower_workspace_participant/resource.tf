@@ -14,3 +14,11 @@ resource "nftower_workspace_participant" "example" {
   member_id    = nftower_organization_member.example.id
   role         = "maintain"
 }
+
+resource "nftower_workspace_participant" "example_by_email" {
+  workspace_id = nftower_workspace.example.id
+  email        = "myuser@domain.com"
+  role         = "maintain"
+
+  depends_on = [nftower_organization_member.example]
+}
