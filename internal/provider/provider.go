@@ -53,6 +53,7 @@ func New(version string) func() *schema.Provider {
 				"nftower_workspace_participant": resourceWorkspaceParticipant(),
 				"nftower_dataset":               resourceDataset(),
 				"nftower_dataset_version":       resourceDatasetVersion(),
+				"nftower_action":                resourceAction(),
 			},
 		}
 
