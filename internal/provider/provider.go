@@ -54,6 +54,7 @@ func New(version string) func() *schema.Provider {
 				"nftower_dataset":               resourceDataset(),
 				"nftower_dataset_version":       resourceDatasetVersion(),
 				"nftower_action":                resourceAction(),
+				"nftower_token":                 resourceToken(),
 			},
 		}
 
