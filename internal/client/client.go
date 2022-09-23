@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -67,7 +70,7 @@ func NewTowerClient(ctx context.Context, userAgent string, apiKey string, apiUrl
 
 func (c *TowerClient) getOrgIdFromName(ctx context.Context, orgName string) (int64, error) {
 	tflog.Trace(ctx, fmt.Sprintf("Getting orgId from name for %s", orgName))
-	res, err := c.request(ctx, "GET", "/orgs", nil, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", "/orgs", nil)
 
 	if err != nil {
 		return -1, err
@@ -85,16 +88,66 @@ func (c *TowerClient) getOrgIdFromName(ctx context.Context, orgName string) (int
 	return -1, fmt.Errorf("Could not find an organization with the name %s", orgName)
 }
 
-func (c *TowerClient) request(ctx context.Context, method string, path string, query map[string]string, payload interface{}) (interface{}, error) {
-	var r io.Reader
-	if payload != nil {
-		buf := &bytes.Buffer{}
-		r = buf
+func (c *TowerClient) prepareJsonPayload(payload interface{}) (io.Reader, string, error) {
+	buf := &bytes.Buffer{}
+
+	// json payload
+	if _, ok := payload.(map[string]interface{}); ok {
 		err := json.NewEncoder(buf).Encode(payload)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
+
+	return buf, "application/json", nil
+}
+
+func (c *TowerClient) prepareFilePayload(file *strings.Reader, filename string) (io.Reader, string, error) {
+	buf := &bytes.Buffer{}
+
+	writer := multipart.NewWriter(buf)
+	contentType, err := mimetype.DetectReader(file)
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	// rewind the ioreader after mime detection
+	file.Seek(0, io.SeekStart)
+
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"`, filename))
+	h.Set("Content-Type", contentType.String())
+	part, err := writer.CreatePart(h)
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	io.Copy(part, file)
+	writer.Close()
+
+	return buf, writer.FormDataContentType(), nil
+}
+
+func (c *TowerClient) requestWithoutPayload(ctx context.Context, method string, path string, query map[string]string) (interface{}, error) {
+	return c.request(ctx, method, path, query, nil, "")
+}
+
+func (c *TowerClient) requestWithJsonPayload(ctx context.Context, method string, path string, query map[string]string, payload map[string]interface{}) (interface{}, error) {
+	body, contentType, err := c.prepareJsonPayload(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.requestWithPayload(ctx, method, path, query, body, contentType)
+}
+
+func (c *TowerClient) requestWithPayload(ctx context.Context, method string, path string, query map[string]string, payload io.Reader, contentType string) (interface{}, error) {
+	return c.request(ctx, method, path, query, payload, contentType)
+}
+
+func (c *TowerClient) request(ctx context.Context, method string, path string, query map[string]string, payload io.Reader, contentType string) (interface{}, error) {
 
 	var querystring string = ""
 	if query != nil {
@@ -107,7 +160,7 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 		ctx,
 		method,
 		c.apiUrl.ResolveReference(&url.URL{Path: path, RawQuery: querystring}).String(),
-		r)
+		payload)
 
 	if err != nil {
 		return nil, err
@@ -116,8 +169,10 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
 	req.Header.Set("User-Agent", c.userAgent)
 	if payload != nil {
-		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Content-Type", contentType)
 	}
+
+	tflog.Trace(ctx, fmt.Sprintf("header: Content-Type: %s", req.Header.Get("Content-Type")))
 
 	httpResp, err := c.http.Do(req)
 	if err != nil {
@@ -139,7 +194,11 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 		return body, nil
 	}
 
-	err = json.Unmarshal(body, &resp)
+	if httpResp.Header.Get("Content-Type") == "application/json" {
+		err = json.Unmarshal(body, &resp)
+	} else {
+		return body, nil
+	}
 
 	if err != nil {
 		return nil, err

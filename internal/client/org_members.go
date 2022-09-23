@@ -11,7 +11,7 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 		"user": email,
 	}
 
-	res, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/add", c.orgId), nil, payload)
+	res, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/add", c.orgId), nil, payload)
 
 	if err != nil {
 		return -1, err
@@ -36,17 +36,12 @@ func (c *TowerClient) UpdateOrganizationMemberRole(ctx context.Context, id int64
 		"role": role,
 	}
 
-	_, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/%d/role", c.orgId, id), nil, payload)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/%d/role", c.orgId, id), nil, payload)
+	return err
 }
 
 func (c *TowerClient) GetOrganizationMember(ctx context.Context, email string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/orgs/%d/members", c.orgId), map[string]string{"search": email}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/members", c.orgId), map[string]string{"search": email})
 
 	if err != nil {
 		return nil, err
@@ -64,6 +59,6 @@ func (c *TowerClient) GetOrganizationMember(ctx context.Context, email string) (
 }
 
 func (c *TowerClient) DeleteOrganizationMember(ctx context.Context, id int64) error {
-	_, err := c.request(ctx, "DELETE", fmt.Sprintf("/orgs/%d/members/%d", c.orgId, id), nil, nil)
+	_, err := c.requestWithoutPayload(ctx, "DELETE", fmt.Sprintf("/orgs/%d/members/%d", c.orgId, id), nil)
 	return err
 }

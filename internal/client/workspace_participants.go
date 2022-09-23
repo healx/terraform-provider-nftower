@@ -11,7 +11,7 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 		"memberId": memberId,
 	}
 
-	res, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/add", c.orgId, workspaceId), nil, payload)
+	res, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/add", c.orgId, workspaceId), nil, payload)
 
 	if err != nil {
 		return -1, "", err
@@ -36,17 +36,12 @@ func (c *TowerClient) UpdateWorkspaceParticipantRole(ctx context.Context, worksp
 		"role": role,
 	}
 
-	_, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/%d/role", c.orgId, workspaceId, id), nil, payload)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/%d/role", c.orgId, workspaceId, id), nil, payload)
+	return err
 }
 
 func (c *TowerClient) GetWorkspaceParticipant(ctx context.Context, workspaceId string, email string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%s/participants", c.orgId, workspaceId), map[string]string{"search": email}, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%s/participants", c.orgId, workspaceId), map[string]string{"search": email})
 
 	if err != nil {
 		return nil, err
@@ -64,6 +59,6 @@ func (c *TowerClient) GetWorkspaceParticipant(ctx context.Context, workspaceId s
 }
 
 func (c *TowerClient) DeleteWorkspaceParticipant(ctx context.Context, workspaceId string, id int64) error {
-	_, err := c.request(ctx, "DELETE", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/%d", c.orgId, workspaceId, id), nil, nil)
+	_, err := c.requestWithoutPayload(ctx, "DELETE", fmt.Sprintf("/orgs/%d/workspaces/%s/participants/%d", c.orgId, workspaceId, id), nil)
 	return err
 }

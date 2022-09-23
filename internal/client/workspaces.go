@@ -16,7 +16,7 @@ func (c *TowerClient) CreateWorkspace(ctx context.Context, name string, fullName
 		},
 	}
 
-	res, err := c.request(ctx, "POST", fmt.Sprintf("/orgs/%d/workspaces", c.orgId), nil, payload)
+	res, err := c.requestWithJsonPayload(ctx, "POST", fmt.Sprintf("/orgs/%d/workspaces", c.orgId), nil, payload)
 
 	if err != nil {
 		return -1, err
@@ -33,7 +33,7 @@ func (c *TowerClient) CreateWorkspace(ctx context.Context, name string, fullName
 }
 
 func (c *TowerClient) GetWorkspace(ctx context.Context, id int64) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil)
 
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (c *TowerClient) GetWorkspace(ctx context.Context, id int64) (map[string]in
 }
 
 func (c *TowerClient) GetWorkspaceByName(ctx context.Context, name string) (map[string]interface{}, error) {
-	res, err := c.request(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces", c.orgId), nil, nil)
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces", c.orgId), nil)
 
 	if err != nil {
 		return nil, err
@@ -64,18 +64,18 @@ func (c *TowerClient) GetWorkspaceByName(ctx context.Context, name string) (map[
 }
 
 func (c *TowerClient) DeleteWorkspace(ctx context.Context, id int64) error {
-	_, err := c.request(ctx, "DELETE", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil, nil)
+	_, err := c.requestWithoutPayload(ctx, "DELETE", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil)
 	return err
 }
 
 func (c *TowerClient) UpdateWorkspace(ctx context.Context, id int64, fullName string, description string, visibility string) error {
 
-	payload := map[string]string{
+	payload := map[string]interface{}{
 		"fullName":    fullName,
 		"description": description,
 		"visibility":  visibility,
 	}
 
-	_, err := c.request(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil, payload)
+	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/workspaces/%d", c.orgId, id), nil, payload)
 	return err
 }
