@@ -54,13 +54,18 @@ func dataSourceWorkspaceParticipant() *schema.Resource {
 func dataSourceWorkspaceParticipantRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*client.TowerClient)
 
+	email := d.Get("email").(string)
 	participant, err := client.GetWorkspaceParticipant(
 		ctx,
 		d.Get("workspace_id").(string),
-		d.Get("email").(string))
+		email)
 
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if participant == nil {
+		return diag.Errorf("unable to find participant with email: %s", email)
 	}
 
 	d.SetId(fmt.Sprintf("%d", int64(participant["participantId"].(float64))))

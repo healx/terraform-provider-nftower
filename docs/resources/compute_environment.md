@@ -63,7 +63,7 @@ resource "nftower_compute_environment" "example-awsbatch" {
 - `date_created` (String) The datetime the workspace was created.
 - `id` (String) The ID of this resource.
 - `last_updated` (String) The last updated datetime of the workspace.
-- `status` (String) The status of the workspace. Can be CREATING, AVAILABLE or ERRORED.
+- `status` (String) The status of the workspace. Can be CREATING, AVAILABLE, ERRORED or INVALID.
 
 <a id="nestedblock--aws_batch"></a>
 ### Nested Schema for `aws_batch`

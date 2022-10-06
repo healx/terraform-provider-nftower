@@ -92,6 +92,10 @@ func dataSourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
+	if credentials == nil {
+		return diag.Errorf("unable to find credentials with name: %s", d.Get("name").(string))
+	}
+
 	d.SetId(credentials["id"].(string))
 	d.Set("name", credentials["name"].(string))
 	d.Set("description", credentials["description"].(string))

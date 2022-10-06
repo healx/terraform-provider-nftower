@@ -48,13 +48,16 @@ func dataSourceOrganizationMember() *schema.Resource {
 
 func dataSourceOrganizationMemberRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*client.TowerClient)
-
-	member, err := client.GetOrganizationMember(
-		ctx,
-		d.Get("email").(string))
+	
+	email := d.Get("email").(string)
+	member, err := client.GetOrganizationMember(ctx, email)
 
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if member == nil {
+		return diag.Errorf("unable to find member with email: %s", email)
 	}
 
 	d.SetId(fmt.Sprintf("%d", int64(member["memberId"].(float64))))

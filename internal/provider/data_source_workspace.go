@@ -60,6 +60,10 @@ func dataSourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta a
 		return diag.FromErr(err)
 	}
 
+	if workspace == nil {
+		return diag.Errorf("unable to find workspace with name: %s", d.Get("name").(string))
+	}
+
 	d.SetId(fmt.Sprintf("%d", int64(workspace["id"].(float64))))
 
 	d.Set("name", workspace["name"].(string))

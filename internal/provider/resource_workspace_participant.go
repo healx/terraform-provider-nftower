@@ -124,6 +124,11 @@ func resourceWorkspaceParticipantRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
+	if participant == nil {
+		d.SetId("")
+		return nil
+	}
+
 	if v, ok := participant["firstName"].(string); ok {
 		d.Set("first_name", v)
 	}

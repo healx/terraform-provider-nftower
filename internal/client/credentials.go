@@ -94,6 +94,13 @@ func (c *TowerClient) GetCredentials(ctx context.Context, workspaceId string, id
 	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/credentials/%s", id), map[string]string{"workspaceId": workspaceId})
 
 	if err != nil {
+		if v, ok := err.(towerError); ok {
+			if v.statusCode == 403 {
+				// when the remote credentials have been deleted,
+				// tower returns a 403 instead of a 404 :(
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 

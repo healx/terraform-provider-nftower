@@ -41,7 +41,7 @@ func (c *TowerClient) GetToken(ctx context.Context, id string) (map[string]inter
 		}
 	}
 
-	return nil, fmt.Errorf("Could not find token with id %s", id)
+	return nil, nil
 }
 
 func (c *TowerClient) DeleteToken(ctx context.Context, id string) error {

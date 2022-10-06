@@ -187,7 +187,7 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 	}
 
 	if httpResp.StatusCode > 399 {
-		return nil, fmt.Errorf("Tower API returned status: %s %s %s", httpResp.Status, httpResp.Request.URL, string(body))
+		return nil, newTowerError(fmt.Errorf("Tower API returned status: %s %s %s", httpResp.Status, httpResp.Request.URL, string(body)), httpResp.StatusCode)
 	}
 
 	if body == nil || len(body) == 0 {

@@ -91,6 +91,11 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta any
 		return diag.FromErr(err)
 	}
 
+	if workspace == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("name", workspace["name"].(string))
 	d.Set("full_name", workspace["fullName"].(string))
 

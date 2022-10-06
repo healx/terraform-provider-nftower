@@ -31,8 +31,19 @@ func (c *TowerClient) GetDataset(ctx context.Context, workspaceId string, id str
 		return nil, err
 	}
 
+	if res == nil {
+		return nil, nil
+	}
+
 	datasetObj := res.(map[string]interface{})
-	return datasetObj["dataset"].(map[string]interface{}), nil
+
+	dataset := datasetObj["dataset"].(map[string]interface{})
+
+	if dataset["deleted"].(bool) {
+		return nil, nil
+	}
+
+	return dataset, nil
 }
 
 func (c *TowerClient) UpdateDataset(ctx context.Context, workspaceId string, id string, name string, description string) error {

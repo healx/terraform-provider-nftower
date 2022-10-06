@@ -185,6 +185,11 @@ func resourceActionRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		return diag.FromErr(err)
 	}
 
+	if action == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("name", action["name"].(string))
 	d.Set("source", action["source"].(string))
 	d.Set("status", action["status"].(string))

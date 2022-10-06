@@ -61,6 +61,11 @@ func resourceTokenRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diag.FromErr(err)
 	}
 
+	if token == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("name", token["name"].(string))
 	d.Set("date_created", token["dateCreated"].(string))
 
