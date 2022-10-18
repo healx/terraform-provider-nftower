@@ -45,7 +45,7 @@ func resourceComputeEnvironment() *schema.Resource {
 				ForceNew:    true,
 			},
 			"status": {
-				Description: "The status of the workspace. Can be CREATING, AVAILABLE or ERRORED.",
+				Description: "The status of the workspace. Can be CREATING, AVAILABLE, ERRORED or INVALID.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
@@ -208,6 +208,11 @@ func resourceComputeEnvironmentRead(ctx context.Context, d *schema.ResourceData,
 
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if computeEnv == nil {
+		d.SetId("")
+		return nil
 	}
 
 	d.Set("name", computeEnv["name"].(string))

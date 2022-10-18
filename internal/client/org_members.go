@@ -50,7 +50,7 @@ func (c *TowerClient) GetOrganizationMember(ctx context.Context, email string) (
 	members := res.(map[string]interface{})
 
 	if int64(members["totalSize"].(float64)) == 0 {
-		return nil, fmt.Errorf("Could not find a member with email %s", email)
+		return nil, nil
 	}
 
 	member := members["members"].([]interface{})

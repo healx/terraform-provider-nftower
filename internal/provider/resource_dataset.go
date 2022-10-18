@@ -79,6 +79,11 @@ func resourceDatasetRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diag.FromErr(err)
 	}
 
+	if dataset == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("name", dataset["name"].(string))
 
 	if description, ok := dataset["description"].(string); ok {

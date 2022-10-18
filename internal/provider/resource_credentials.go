@@ -153,6 +153,11 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 		return diag.FromErr(err)
 	}
 
+	if credentials == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("name", credentials["name"].(string))
 	d.Set("description", credentials["description"].(string))
 	d.Set("date_created", credentials["dateCreated"].(string))

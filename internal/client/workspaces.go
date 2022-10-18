@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 func (c *TowerClient) CreateWorkspace(ctx context.Context, name string, fullName string, description string, visibility string) (int64, error) {
@@ -39,9 +40,14 @@ func (c *TowerClient) GetWorkspace(ctx context.Context, id int64) (map[string]in
 		return nil, err
 	}
 
-	workspace := res.(map[string]interface{})
+	workspaceObj := res.(map[string]interface{})
+	workspace := workspaceObj["workspace"].(map[string]interface{})
 
-	return workspace["workspace"].(map[string]interface{}), nil
+	if strings.HasPrefix(workspace["name"].(string), "deleted-"){
+		return nil, nil
+	}
+
+	return workspace, nil
 }
 
 func (c *TowerClient) GetWorkspaceByName(ctx context.Context, name string) (map[string]interface{}, error) {

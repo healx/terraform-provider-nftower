@@ -50,7 +50,7 @@ func (c *TowerClient) GetWorkspaceParticipant(ctx context.Context, workspaceId s
 	participants := res.(map[string]interface{})
 
 	if int64(participants["totalSize"].(float64)) == 0 {
-		return nil, fmt.Errorf("Could not find a member with email %s", email)
+		return nil, nil
 	}
 
 	participant := participants["participants"].([]interface{})

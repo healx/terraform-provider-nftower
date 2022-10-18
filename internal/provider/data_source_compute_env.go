@@ -2,9 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/healx/terraform-provider-nftower/internal/client"
@@ -155,10 +152,12 @@ func dataSourceComputeEnvRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	computeEnv, err := towerClient.GetComputeEnvByName(ctx, d.Get("workspace_id").(string), d.Get("name").(string))
 
-	tflog.Trace(ctx, fmt.Sprintf("computeEnv: %v", computeEnv))
-
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if computeEnv == nil {
+		return diag.Errorf("unable to find compute environment with name: %s", d.Get("name").(string))
 	}
 
 	d.SetId(computeEnv["id"].(string))

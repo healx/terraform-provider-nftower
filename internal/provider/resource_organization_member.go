@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/healx/terraform-provider-nftower/internal/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/healx/terraform-provider-nftower/internal/client"
 )
 
 func resourceOrganizationMember() *schema.Resource {
@@ -29,10 +28,10 @@ func resourceOrganizationMember() *schema.Resource {
 				ForceNew:    true,
 			},
 			"role": {
-				Description: "The role of the member. Can be owner or member",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "member",
+				Description:  "The role of the member. Can be owner or member",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "member",
 				ValidateFunc: validation.StringInSlice([]string{"member", "owner"}, false),
 			},
 			"first_name": {
@@ -81,7 +80,10 @@ func resourceOrganizationMemberRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	tflog.Trace(ctx, "reading new member", member)
+	if member == nil {
+		d.SetId("")
+		return nil
+	}
 
 	d.Set("email", member["email"].(string))
 	d.Set("user_name", member["userName"].(string))
