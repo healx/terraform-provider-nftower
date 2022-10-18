@@ -78,8 +78,10 @@ func (c *TowerClient) GetComputeEnv(ctx context.Context, workspaceId string, id 
 	computeEnvObj := res.(map[string]interface{})
 	computeEnv := computeEnvObj["computeEnv"].(map[string]interface{})
 
-	if computeEnv["deleted"].(bool) {
-		return nil, nil
+	if v, ok := computeEnv["deleted"].(bool); ok {
+		if v {
+			return nil, nil
+		}
 	}
 
 	switch computeEnv["platform"].(string) {

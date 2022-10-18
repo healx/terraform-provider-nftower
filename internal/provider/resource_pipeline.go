@@ -2,41 +2,39 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/healx/terraform-provider-nftower/internal/client"
 )
 
-func resourceAction() *schema.Resource {
+func resourcePipeline() *schema.Resource {
 	return &schema.Resource{
-		Description: "A workspace inside a tower organization.",
+		Description: "A workflow pipeline.",
 
-		CreateContext: resourceActionCreate,
-		ReadContext:   resourceActionRead,
-		UpdateContext: resourceActionUpdate,
-		DeleteContext: resourceActionDelete,
+		CreateContext: resourcePipelineCreate,
+		ReadContext:   resourcePipelineRead,
+		UpdateContext: resourcePipelineUpdate,
+		DeleteContext: resourcePipelineDelete,
 
 		Schema: map[string]*schema.Schema{
 			"workspace_id": {
-				Description: "The id of the workspace in which the action should be created.",
+				Description: "The id of the workspace in which the pipeline should be created.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 			},
 			"name": {
-				Description: "The name of the action",
+				Description: "The name of the pipeline.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 			},
-			"source": {
-				Description:  "The source of the event. Can be github or tower",
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"github", "tower"}, false),
+			"description": {
+				Description: "A description of the pipeline.",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 			"compute_environment_id": {
 				Description: "The id of the compute environment to use.",
@@ -115,43 +113,18 @@ func resourceAction() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"launch_id": {
-				Description: "The id of the launch configuration for the action.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"status": {
-				Description: "The status of the action. Can be ACTIVE or PAUSED",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"hook_url": {
-				Description: "The url to trigger the action.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"date_created": {
-				Description: "The datetime that the action was created.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"last_updated": {
-				Description: "The datetime that the action was last updated.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
 		},
 	}
 }
 
-func resourceActionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourcePipelineCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	c := meta.(*client.TowerClient)
 
-	id, err := c.CreateAction(
+	id, err := c.CreatePipeline(
 		ctx,
 		d.Get("workspace_id").(string),
 		d.Get("name").(string),
-		d.Get("source").(string),
+		d.Get("description").(string),
 		d.Get("compute_environment_id").(string),
 		d.Get("pipeline").(string),
 		d.Get("work_dir").(string),
@@ -171,100 +144,89 @@ func resourceActionCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		return diag.FromErr(err)
 	}
 
-	d.SetId(id)
+	d.SetId(fmt.Sprintf("%d", id))
 
-	return resourceActionRead(ctx, d, meta)
+	return resourcePipelineRead(ctx, d, meta)
 }
 
-func resourceActionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	c := meta.(*client.TowerClient)
 
-	action, err := c.GetAction(
-		ctx,
-		d.Get("workspace_id").(string),
-		d.Id())
+	pipeline, err := c.GetPipeline(ctx, d.Get("workspace_id").(string), d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if action == nil {
+	if pipeline == nil {
 		d.SetId("")
 		return nil
 	}
 
-	d.Set("name", action["name"].(string))
-	d.Set("source", action["source"].(string))
-	d.Set("status", action["status"].(string))
-	d.Set("hook_url", action["hookUrl"].(string))
-	d.Set("date_created", action["dateCreated"].(string))
-	d.Set("last_updated", action["lastUpdated"].(string))
+	d.Set("name", pipeline["name"].(string))
+	d.Set("pipeline", pipeline["pipeline"].(string))
+	d.Set("work_dir", pipeline["workDir"].(string))
 
-	launch := action["launch"].(map[string]interface{})
-	d.Set("pipeline", launch["pipeline"].(string))
-	d.Set("work_dir", launch["workDir"].(string))
-	d.Set("launch_id", launch["id"].(string))
-
-	computeEnv := launch["computeEnv"].(map[string]interface{})
+	computeEnv := pipeline["computeEnv"].(map[string]interface{})
 	d.Set("compute_environment_id", computeEnv["id"].(string))
 
-	if v, ok := launch["revision"].(string); ok {
+	if v, ok := pipeline["revision"].(string); ok {
 		d.Set("revision", v)
 	}
 
-	if v, ok := launch["preRunScript"].(string); ok {
+	if v, ok := pipeline["preRunScript"].(string); ok {
 		d.Set("pre_run_script", v)
 	}
 
-	if v, ok := launch["postRunScript"].(string); ok {
+	if v, ok := pipeline["postRunScript"].(string); ok {
 		d.Set("post_run_script", v)
 	}
 
-	if v, ok := launch["configProfiles"].([]interface{}); ok {
+	if v, ok := pipeline["configProfiles"].([]interface{}); ok {
 		d.Set("config_profiles", v)
 	}
 
-	if v, ok := launch["paramsText"].(string); ok {
+	if v, ok := pipeline["paramsText"].(string); ok {
 		d.Set("pipeline_parameters", v)
 	}
 
-	if v, ok := launch["configText"].(string); ok {
+	if v, ok := pipeline["configText"].(string); ok {
 		d.Set("nextflow_config", v)
 	}
 
-	if v, ok := launch["towerConfig"].(string); ok {
+	if v, ok := pipeline["towerConfig"].(string); ok {
 		d.Set("tower_config", v)
 	}
 
-	if v, ok := launch["mainScript"].(string); ok {
+	if v, ok := pipeline["mainScript"].(string); ok {
 		d.Set("main_script", v)
 	}
 
-	if v, ok := launch["entryName"].(string); ok {
+	if v, ok := pipeline["entryName"].(string); ok {
 		d.Set("workflow_entry_name", v)
 	}
 
-	if v, ok := launch["schema_name"].(string); ok {
+	if v, ok := pipeline["schema_name"].(string); ok {
 		d.Set("schema_name", v)
 	}
 
-	if v, ok := launch["workspaceSecrets"].([]interface{}); ok {
+	if v, ok := pipeline["workspaceSecrets"].([]interface{}); ok {
 		d.Set("workspace_secrets", v)
 	}
 
 	return nil
 }
 
-func resourceActionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourcePipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	c := meta.(*client.TowerClient)
 
-	err := c.UpdateAction(
+	err := c.UpdatePipeline(
 		ctx,
 		d.Get("workspace_id").(string),
 		d.Id(),
-		d.Get("pipeline").(string),
-		d.Get("launch_id").(string),
+		d.Get("description").(string),
 		d.Get("compute_environment_id").(string),
+		d.Get("pipeline").(string),
 		d.Get("work_dir").(string),
 		d.Get("revision").(string),
 		d.Get("pre_run_script").(string),
@@ -281,14 +243,13 @@ func resourceActionUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	return resourceActionRead(ctx, d, meta)
+	return resourcePipelineRead(ctx, d, meta)
 }
 
-func resourceActionDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourcePipelineDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	c := meta.(*client.TowerClient)
 
-	err := c.DeleteAction(ctx, d.Get("workspace_id").(string), d.Id())
+	err := c.DeletePipeline(ctx, d.Get("workspace_id").(string), d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)

@@ -151,9 +151,11 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 
 	var querystring string = ""
 	if query != nil {
+		qsBits := []string{}
 		for k, v := range query {
-			querystring += fmt.Sprintf("%s=%s", k, url.QueryEscape(v))
+			qsBits = append(qsBits, fmt.Sprintf("%s=%s", k, url.QueryEscape(v)))
 		}
+		querystring = strings.Join(qsBits, "&")
 	}
 
 	req, err := retryablehttp.NewRequestWithContext(

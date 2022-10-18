@@ -16,7 +16,7 @@ func (c *TowerClient) CreateAction(
 	revision string,
 	preRunScript string,
 	postRunScript string,
-	configProfiles string,
+	configProfiles []interface{},
 	pipelineParameters string,
 	nextflowConfig string,
 	towerConfig string,
@@ -34,10 +34,8 @@ func (c *TowerClient) CreateAction(
 	payload := map[string]interface{}{
 		"name":   name,
 		"source": source,
-		"launch": setOptionalFields(
+		"launch": setOptionalPipelineFields(
 			launchPayload,
-			computeEnvironmentId,
-			workDir,
 			revision,
 			preRunScript,
 			postRunScript,
@@ -84,7 +82,7 @@ func (c *TowerClient) UpdateAction(
 	revision string,
 	preRunScript string,
 	postRunScript string,
-	configProfiles string,
+	configProfiles []interface{},
 	pipelineParameters string,
 	nextflowConfig string,
 	towerConfig string,
@@ -101,10 +99,8 @@ func (c *TowerClient) UpdateAction(
 	}
 
 	payload := map[string]interface{}{
-		"launch": setOptionalFields(
+		"launch": setOptionalPipelineFields(
 			launchPayload,
-			computeEnvironmentId,
-			workDir,
 			revision,
 			preRunScript,
 			postRunScript,
@@ -127,14 +123,12 @@ func (c *TowerClient) DeleteAction(ctx context.Context, workspaceId string, id s
 	return err
 }
 
-func setOptionalFields(
+func setOptionalPipelineFields(
 	payload map[string]interface{},
-	computeEnvironmentId string,
-	workDir string,
 	revision string,
 	preRunScript string,
 	postRunScript string,
-	configProfiles string,
+	configProfiles []interface{},
 	pipelineParameters string,
 	nextflowConfig string,
 	towerConfig string,
@@ -146,8 +140,12 @@ func setOptionalFields(
 		payload["revision"] = revision
 	}
 
-	if configProfiles != "" {
-		payload["configProfiles"] = configProfiles
+	if configProfiles != nil {
+		profiles := []string{}
+		for _, v := range configProfiles {
+			profiles = append(profiles, v.(string))
+		}
+		payload["workspaceSecrets"] = profiles
 	}
 
 	if towerConfig != "" {
