@@ -23,12 +23,20 @@ func (c *TowerClient) CreateAction(
 	mainScript string,
 	workflowEntryName string,
 	schemaName string,
-	workspaceSecrets []interface{}) (string, error) {
+	workspaceSecrets []interface{},
+	labels []string) (string, error) {
+
+	labelIds, err := c.createLabels(ctx, workspaceId, labels)
+
+	if err != nil {
+		return "", err
+	}
 
 	launchPayload := map[string]interface{}{
 		"computeEnvId": computeEnvironmentId,
 		"pipeline":     pipeline,
 		"workDir":      workDir,
+		"labelsIds":    labelIds,
 	}
 
 	payload := map[string]interface{}{
@@ -60,7 +68,7 @@ func (c *TowerClient) CreateAction(
 }
 
 func (c *TowerClient) GetAction(ctx context.Context, workspaceId string, id string) (map[string]interface{}, error) {
-	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/actions/%s", id), map[string]string{"workspaceId": workspaceId})
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/actions/%s", id), map[string]string{"workspaceId": workspaceId, "attributes": "labels"})
 
 	if err != nil {
 		return nil, err
@@ -89,13 +97,21 @@ func (c *TowerClient) UpdateAction(
 	mainScript string,
 	workflowEntryName string,
 	schemaName string,
-	workspaceSecrets []interface{}) error {
+	workspaceSecrets []interface{},
+	labels []string) error {
+
+	labelIds, err := c.createLabels(ctx, workspaceId, labels)
+
+	if err != nil {
+		return err
+	}
 
 	launchPayload := map[string]interface{}{
 		"id":           launchId,
 		"computeEnvId": computeEnvironmentId,
 		"pipeline":     pipeline,
 		"workDir":      workDir,
+		"labelsIds":    labelIds,
 	}
 
 	payload := map[string]interface{}{
@@ -114,7 +130,7 @@ func (c *TowerClient) UpdateAction(
 			workspaceSecrets),
 	}
 
-	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/actions/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
+	_, err = c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/actions/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
 	return err
 }
 

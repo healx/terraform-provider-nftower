@@ -46,6 +46,7 @@ resource "nftower_pipeline" "example-tower" {
 
 - `config_profiles` (List of String) A list of one or more configuration profile names you want to use for this pipeline execution. The profile must be defined in the nextflow.config file included in the pipeline repository.
 - `description` (String) A description of the pipeline.
+- `labels` (Set of String) A set of labels to apply to the triggered pipeline run. Minimum 2 characters.
 - `main_script` (String) Specify the pipeline main script file if different from `main.nf`
 - `nextflow_config` (String) Additional Nextflow config settings can be provided in the above field. These settings will be included in the nextflow.config file for this execution.
 - `pipeline_parameters` (String) You can specify here any pipeline parameters using either JSON or YML formatted content. This equivalent to the Nextflow -params-file option.

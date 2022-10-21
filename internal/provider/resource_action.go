@@ -130,6 +130,15 @@ func resourceAction() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
+			"labels": {
+				Description: "A set of value labels to apply to the triggered pipeline run. Minimum 2 characters.",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringLenBetween(2, 1000),
+				},
+			},
 			"date_created": {
 				Description: "The datetime that the action was created.",
 				Type:        schema.TypeString,
@@ -165,7 +174,8 @@ func resourceActionCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		d.Get("main_script").(string),
 		d.Get("workflow_entry_name").(string),
 		d.Get("schema_name").(string),
-		d.Get("workspace_secrets").([]interface{}))
+		d.Get("workspace_secrets").([]interface{}),
+		expandLabels(d.Get("labels").(*schema.Set)))
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -252,6 +262,10 @@ func resourceActionRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		d.Set("workspace_secrets", v)
 	}
 
+	if v, ok := action["labels"].([]interface{}); ok {
+		d.Set("labels", flattenLabels(v))
+	}
+
 	return nil
 }
 
@@ -276,7 +290,8 @@ func resourceActionUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		d.Get("main_script").(string),
 		d.Get("workflow_entry_name").(string),
 		d.Get("schema_name").(string),
-		d.Get("workspace_secrets").([]interface{}))
+		d.Get("workspace_secrets").([]interface{}),
+		expandLabels(d.Get("labels").(*schema.Set)))
 
 	if err != nil {
 		return diag.FromErr(err)

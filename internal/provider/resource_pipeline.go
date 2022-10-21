@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/healx/terraform-provider-nftower/internal/client"
 )
 
@@ -113,6 +114,15 @@ func resourcePipeline() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"labels": {
+				Description: "A set of labels to apply to the triggered pipeline run. Minimum 2 characters.",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringLenBetween(2, 1000),
+				},
+			},
 		},
 	}
 }
@@ -138,7 +148,8 @@ func resourcePipelineCreate(ctx context.Context, d *schema.ResourceData, meta an
 		d.Get("main_script").(string),
 		d.Get("workflow_entry_name").(string),
 		d.Get("schema_name").(string),
-		d.Get("workspace_secrets").([]interface{}))
+		d.Get("workspace_secrets").([]interface{}),
+		expandLabels(d.Get("labels").(*schema.Set)))
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -214,6 +225,10 @@ func resourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta any)
 		d.Set("workspace_secrets", v)
 	}
 
+	if v, ok := pipeline["labels"].([]interface{}); ok {
+		d.Set("labels", flattenLabels(v))
+	}
+
 	return nil
 }
 
@@ -238,7 +253,8 @@ func resourcePipelineUpdate(ctx context.Context, d *schema.ResourceData, meta an
 		d.Get("main_script").(string),
 		d.Get("workflow_entry_name").(string),
 		d.Get("schema_name").(string),
-		d.Get("workspace_secrets").([]interface{}))
+		d.Get("workspace_secrets").([]interface{}),
+		expandLabels(d.Get("labels").(*schema.Set)))
 
 	if err != nil {
 		return diag.FromErr(err)
