@@ -178,6 +178,4 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	return nil
-
-	return nil
 }

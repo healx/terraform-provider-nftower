@@ -23,7 +23,14 @@ func (c *TowerClient) CreatePipeline(
 	mainScript string,
 	workflowEntryName string,
 	schemaName string,
-	workspaceSecrets []interface{}) (int64, error) {
+	workspaceSecrets []interface{},
+	labels []string) (int64, error) {
+
+	labelIds, err := c.createLabels(ctx, workspaceId, labels)
+
+	if err != nil {
+		return -1, err
+	}
 
 	launchPayload := map[string]interface{}{
 		"computeEnvId": computeEnvironmentId,
@@ -34,6 +41,7 @@ func (c *TowerClient) CreatePipeline(
 	payload := map[string]interface{}{
 		"name":        name,
 		"description": description,
+		"labelsIds":   labelIds,
 		"launch": setOptionalPipelineFields(
 			launchPayload,
 			revision,
@@ -62,7 +70,7 @@ func (c *TowerClient) CreatePipeline(
 }
 
 func (c *TowerClient) GetPipeline(ctx context.Context, workspaceId string, id string) (map[string]interface{}, error) {
-	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/pipelines/%s", id), map[string]string{"workspaceId": workspaceId})
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/pipelines/%s", id), map[string]string{"workspaceId": workspaceId, "attributes": "labels"})
 
 	if err != nil {
 		if v, ok := err.(towerError); ok {
@@ -93,7 +101,7 @@ func (c *TowerClient) GetPipeline(ctx context.Context, workspaceId string, id st
 }
 
 func (c *TowerClient) GetPipelineByName(ctx context.Context, workspaceId string, name string) (map[string]interface{}, error) {
-	res, err := c.requestWithoutPayload(ctx, "GET", "/pipelines", map[string]string{"workspaceId": workspaceId, "search": name})
+	res, err := c.requestWithoutPayload(ctx, "GET", "/pipelines", map[string]string{"workspaceId": workspaceId, "search": name, "attributes": "labels"})
 
 	if err != nil {
 		return nil, err
@@ -105,11 +113,15 @@ func (c *TowerClient) GetPipelineByName(ctx context.Context, workspaceId string,
 		return nil, nil
 	}
 
-	pipeline := pipelines["pipelines"].([]interface{})
-	p := pipeline[0].(map[string]interface{})
-	id := int64(p["pipelineId"].(float64))
+	for _, pipeline := range pipelines["pipelines"].([]interface{}) {
+		p, _ := pipeline.(map[string]interface{})
+		if p["name"].(string) == name {
+			id := int64(p["pipelineId"].(float64))
+			c.GetPipeline(ctx, workspaceId, fmt.Sprintf("%d", id))
+		}
+	}
 
-	return c.GetPipeline(ctx, workspaceId, fmt.Sprintf("%d", id))
+	return nil, nil
 }
 
 func (c *TowerClient) getPipelineLaunchInfo(ctx context.Context, workspaceId string, id string) (map[string]interface{}, error) {
@@ -147,7 +159,14 @@ func (c *TowerClient) UpdatePipeline(
 	mainScript string,
 	workflowEntryName string,
 	schemaName string,
-	workspaceSecrets []interface{}) error {
+	workspaceSecrets []interface{},
+	labels []string) error {
+
+	labelIds, err := c.createLabels(ctx, workspaceId, labels)
+
+	if err != nil {
+		return err
+	}
 
 	launchPayload := map[string]interface{}{
 		"computeEnvId": computeEnvironmentId,
@@ -157,6 +176,7 @@ func (c *TowerClient) UpdatePipeline(
 
 	payload := map[string]interface{}{
 		"description": description,
+		"labelsIds":   labelIds,
 		"launch": setOptionalPipelineFields(
 			launchPayload,
 			revision,
@@ -172,6 +192,6 @@ func (c *TowerClient) UpdatePipeline(
 			workspaceSecrets),
 	}
 
-	_, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/pipelines/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
+	_, err = c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/pipelines/%s", id), map[string]string{"workspaceId": workspaceId}, payload)
 	return err
 }
