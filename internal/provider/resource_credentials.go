@@ -223,8 +223,8 @@ func resourceCredentialsUpdate(ctx context.Context, d *schema.ResourceData, meta
 	} else if _, ok := d.GetOk("github"); ok {
 		err = towerClient.UpdateCredentialsGithub(
 			ctx,
+			d.Id(),
 			d.Get("workspace_id").(string),
-			d.Get("name").(string),
 			d.Get("description").(string),
 			d.Get("github.0.base_url").(string),
 			d.Get("github.0.username").(string),
