@@ -159,7 +159,11 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 	}
 
 	d.Set("name", credentials["name"].(string))
-	d.Set("description", credentials["description"].(string))
+
+	if v, ok := credentials["description"].(string); ok {
+		d.Set("description", v)
+	}
+
 	d.Set("date_created", credentials["dateCreated"].(string))
 	d.Set("last_updated", credentials["lastUpdated"].(string))
 
