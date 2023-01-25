@@ -88,6 +88,10 @@ func resourceWorkspaceParticipantCreate(ctx context.Context, d *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
+		if member == nil {
+			return diag.Errorf("no member found in organization with email %s", email)
+		}
+
 		memberId = int64(member["memberId"].(float64))
 	}
 
