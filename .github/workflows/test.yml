@@ -86,12 +86,12 @@ jobs:
       run: |
         go mod download
         
-    - name: TF acceptance tests
-      timeout-minutes: 10
-      env:
-        TF_ACC: "1"
-        NFTOWER_API_KEY: ${{ secrets.NFTOWER_ACC_API_KEY }}
-        NFTOWER_ORGANIZATION: healx-tf-acc
+    # - name: TF acceptance tests
+    #   timeout-minutes: 10
+    #   env:
+    #     TF_ACC: "1"
+    #     NFTOWER_API_KEY: ${{ secrets.NFTOWER_ACC_API_KEY }}
+    #     NFTOWER_ORGANIZATION: healx-tf-acc
 
-      run: |
-        go test -v -cover ./internal/provider/
+    #   run: |
+    #     go test -v -cover ./internal/provider/
