@@ -47,6 +47,11 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 
 		participantObj = map[string]interface{}{"participant": participant}
 	} else {
+		ctx = tflog.SetField(ctx, "organizationId", c.orgId)
+		ctx = tflog.SetField(ctx, "workspaceId", workspaceId)
+		ctx = tflog.SetField(ctx, "memberId", memberId)
+		tflog.Debug(ctx, "Member created, updating role")
+
 		participantObj = res.(map[string]interface{})
 	}
 
@@ -112,9 +117,6 @@ func (c *TowerClient) GetWorkspaceParticipantByMemberId(ctx context.Context, wor
 	var participant map[string]interface{}
 	for _, value := range participants {
 		p := value.(map[string]interface{})
-		ctx = tflog.SetField(ctx, "participant", fmt.Sprintf("%v", p))
-		ctx = tflog.SetField(ctx, "memberId", fmt.Sprintf("%d", memberId))
-		tflog.Debug(ctx, "Checking if participant matches ID")
 		if int64(p["memberId"].(float64)) == memberId {
 			participant = p
 			break
