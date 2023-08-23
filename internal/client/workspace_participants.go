@@ -24,10 +24,6 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 		}
 	}
 
-	if res == nil && !participantExists {
-		return -1, "", fmt.Errorf("Empty response from server")
-	}
-
 	var participantObj map[string]interface{}
 	if participantExists {
 		ctx = tflog.SetField(ctx, "organizationId", c.orgId)
@@ -47,6 +43,10 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 
 		participantObj = map[string]interface{}{"participant": participant}
 	} else {
+		if res == nil {
+			return -1, "", fmt.Errorf("Empty response from server")
+		}
+
 		ctx = tflog.SetField(ctx, "organizationId", c.orgId)
 		ctx = tflog.SetField(ctx, "workspaceId", workspaceId)
 		ctx = tflog.SetField(ctx, "memberId", memberId)
