@@ -41,5 +41,3 @@ resource "nftower_dataset" "example" {
 - `date_created` (String) The datetime the dataset was created.
 - `id` (String) The ID of this resource.
 - `last_updated` (String) The last updated datetime of the dataset.
-
-

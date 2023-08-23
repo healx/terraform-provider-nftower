@@ -67,5 +67,3 @@ resource "nftower_action" "example-tower" {
 - `last_updated` (String) The datetime that the action was last updated.
 - `launch_id` (String) The id of the launch configuration for the action.
 - `status` (String) The status of the action. Can be ACTIVE or PAUSED
-
-

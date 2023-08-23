@@ -33,5 +33,3 @@ data "nftower_workspace" "example" {
 - `id` (String) The ID of this resource.
 - `last_updated` (String) The last updated datetime of the workspace.
 - `visibility` (String) The visiblity of the workspace. Can be PRIVATE or PUBLIC.
-
-

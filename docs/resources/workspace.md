@@ -39,5 +39,3 @@ resource "nftower_workspace" "example" {
 - `date_created` (String) The datetime the workspace was created.
 - `id` (String) The ID of this resource.
 - `last_updated` (String) The last updated datetime of the workspace.
-
-

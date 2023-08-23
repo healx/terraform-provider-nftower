@@ -34,5 +34,3 @@ output {
 - `date_created` (String) The datetime that the token was created.
 - `id` (String) The ID of this resource.
 - `token` (String) The token.
-
-
