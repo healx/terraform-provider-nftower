@@ -120,7 +120,7 @@ func resourceWorkspaceParticipantCreate(ctx context.Context, d *schema.ResourceD
 func resourceWorkspaceParticipantRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*client.TowerClient)
 
-	participant, err := client.GetWorkspaceParticipant(ctx,
+	participant, err := client.GetWorkspaceParticipantByMemberEmail(ctx,
 		d.Get("workspace_id").(string),
 		d.Get("email").(string))
 
