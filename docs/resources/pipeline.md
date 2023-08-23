@@ -61,5 +61,3 @@ resource "nftower_pipeline" "example-tower" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

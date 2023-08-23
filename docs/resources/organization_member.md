@@ -40,5 +40,3 @@ resource "nftower_organization_member" "owner" {
 - `id` (String) The ID of this resource.
 - `last_name` (String) The last name of the member.
 - `user_name` (String) The username of the member.
-
-

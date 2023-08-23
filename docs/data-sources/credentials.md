@@ -56,5 +56,3 @@ Read-Only:
 
 - `base_url` (String)
 - `username` (String)
-
-

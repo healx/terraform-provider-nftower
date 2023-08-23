@@ -57,5 +57,3 @@ resource "nftower_workspace_participant" "example_by_email" {
 - `first_name` (String) The first name of the member.
 - `id` (String) The ID of this resource.
 - `last_name` (String) The last name of the member.
-
-

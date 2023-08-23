@@ -83,5 +83,3 @@ Required:
 Optional:
 
 - `base_url` (String) The base url when connecting to github. Used for github enterprise on-prem.
-
-

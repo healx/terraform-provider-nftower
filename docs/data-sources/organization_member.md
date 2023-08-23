@@ -26,5 +26,3 @@ A member of a tower organization.
 - `last_name` (String) The last name of the member.
 - `role` (String) The role of the member. Can be owner or member
 - `user_name` (String) The username of the member.
-
-
