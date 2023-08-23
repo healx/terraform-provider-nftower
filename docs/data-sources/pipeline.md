@@ -49,5 +49,3 @@ data "nftower_pipeline" "hello" {
 - `work_dir` (String) The bucket path where the pipeline scratch data is stored. When only the bucket name is specified, Tower will automatically create a scratch sub-folder.
 - `workflow_entry_name` (String) Specify the main workflow name to be executed when using DLS2 syntax
 - `workspace_secrets` (List of String) A list of named pipeline secrets required by the pipeline execution. Those secrets must be defined in the launching workspace.
-
-

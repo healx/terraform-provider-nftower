@@ -69,5 +69,3 @@ Read-Only:
 - `name` (String)
 - `value` (String)
 - `visiblity` (String)
-
-

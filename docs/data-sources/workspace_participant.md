@@ -27,5 +27,3 @@ A member who has been granted access to a workspace.
 - `last_name` (String) The last name of the member.
 - `member_id` (String) The id of the member in the organization.
 - `role` (String) The role of the participant.
-
-

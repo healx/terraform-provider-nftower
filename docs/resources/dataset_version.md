@@ -57,5 +57,3 @@ EOF
 - `media_type` (String) The computed mime-type of the dataset file
 - `url` (String) The url of the dataset file.
 - `version` (Number) The version number of the dataset.
-
-

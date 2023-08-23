@@ -95,5 +95,3 @@ Required:
 - `name` (String) The name of the environment variable must contain only alphanumeric, dash and underscore characters, and cannot begin with a number.
 - `value` (String) The value of the environment variable.
 - `visibility` (String) Which jobs this environment variable should be available to, can be HEAD, COMPUTE or BOTH.
-
-
