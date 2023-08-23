@@ -55,7 +55,7 @@ func dataSourceWorkspaceParticipantRead(ctx context.Context, d *schema.ResourceD
 	client := meta.(*client.TowerClient)
 
 	email := d.Get("email").(string)
-	participant, err := client.GetWorkspaceParticipant(
+	participant, err := client.GetWorkspaceParticipantByMemberEmail(
 		ctx,
 		d.Get("workspace_id").(string),
 		email)

@@ -73,8 +73,8 @@ func (c *TowerClient) UpdateWorkspaceParticipantRole(ctx context.Context, worksp
 	return err
 }
 
-func (c *TowerClient) GetWorkspaceParticipants(ctx context.Context, workspaceId string) ([]interface{}, error) {
-	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%s/participants", c.orgId, workspaceId), make(map[string]string))
+func (c *TowerClient) GetWorkspaceParticipants(ctx context.Context, workspaceId string, search map[string]string) ([]interface{}, error) {
+	res, err := c.requestWithoutPayload(ctx, "GET", fmt.Sprintf("/orgs/%d/workspaces/%s/participants", c.orgId, workspaceId), search)
 
 	if err != nil {
 		return nil, err
@@ -89,8 +89,8 @@ func (c *TowerClient) GetWorkspaceParticipants(ctx context.Context, workspaceId 
 	return participants["participants"].([]interface{}), nil
 }
 
-func (c *TowerClient) GetWorkspaceParticipant(ctx context.Context, workspaceId string, email string) (map[string]interface{}, error) {
-	participants, err := c.GetWorkspaceParticipants(ctx, workspaceId)
+func (c *TowerClient) GetWorkspaceParticipantByMemberEmail(ctx context.Context, workspaceId string, email string) (map[string]interface{}, error) {
+	participants, err := c.GetWorkspaceParticipants(ctx, workspaceId, map[string]string{"search": email})
 
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (c *TowerClient) GetWorkspaceParticipant(ctx context.Context, workspaceId s
 }
 
 func (c *TowerClient) GetWorkspaceParticipantByMemberId(ctx context.Context, workspaceId string, memberId int64) (map[string]interface{}, error) {
-	participants, err := c.GetWorkspaceParticipants(ctx, workspaceId)
+	participants, err := c.GetWorkspaceParticipants(ctx, workspaceId, map[string]string{})
 
 	if err != nil {
 		return nil, err
