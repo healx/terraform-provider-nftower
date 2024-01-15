@@ -202,3 +202,99 @@ func TestFlattenComputeEnvironmentAWSBatchComplete(t *testing.T) {
 		t.Fatalf("expected %v, got %v", expected, actual)
 	}
 }
+
+func TestFlattenComputeEnvironmentLSFPlatfromMinimal(t *testing.T) {
+	ctx := context.Background()
+	actual := flattenComputeEnvironmentLSFPlatform(ctx, &client.ComputeEnvLSFPlatformConfig{
+		WorkDir:                 "/nextflow/work",
+		LaunchDir:               "/nextflow/launch",
+		UserName:                "nextflow",
+		HostName:                "localhost",
+		HeadQueue:               "head",
+		ComputeQueue:            "compute",
+		HeadJobOptions:          "-x something",
+		PropagateHeadJobOptions: true,
+		PerJobMemLimit:          false,
+		PerTaskReserve:          false,
+		Environment: []*client.ComputeEnvConfigEnvVar{
+			{
+				Name:    "foo",
+				Value:   "bar",
+				Head:    true,
+				Compute: true,
+			},
+		},
+	})
+
+	expected := []interface{}{
+		map[string]interface{}{
+			"work_dir":                   "/nextflow/work",
+			"launch_dir":                 "/nextflow/launch",
+			"user_name":                  "nextflow",
+			"host_name":                  "localhost",
+			"head_queue":                 "head",
+			"compute_queue":              "compute",
+			"head_job_options":           "-x something",
+			"propagate_head_job_options": true,
+			"per_job_mem_limit":          false,
+			"per_task_reserve":           false,
+		},
+	}
+
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
+}
+
+func TestFlattenComputeEnvironmentLSFPlatformComplete(t *testing.T) {
+	ctx := context.Background()
+	actual := flattenComputeEnvironmentLSFPlatform(ctx, &client.ComputeEnvLSFPlatformConfig{
+		WorkDir:                 "/nextflow/work",
+		LaunchDir:               "/nextflow/launch",
+		UserName:                "nextflow",
+		HostName:                "localhost",
+		HeadQueue:               "head",
+		ComputeQueue:            "compute",
+		HeadJobOptions:          "-x something",
+		PropagateHeadJobOptions: false,
+		PerJobMemLimit:          true,
+		PerTaskReserve:          true,
+		Port:                    8000,
+		MaxQueueSize:            100,
+		PreRunScript:            "set -x",
+		PostRunScript:           "echo done",
+		UnitForLimits:           "GB",
+		Environment: []*client.ComputeEnvConfigEnvVar{
+			{
+				Name:    "foo",
+				Value:   "bar",
+				Head:    true,
+				Compute: true,
+			},
+		},
+	})
+
+	expected := []interface{}{
+		map[string]interface{}{
+			"work_dir":                   "/nextflow/work",
+			"launch_dir":                 "/nextflow/launch",
+			"user_name":                  "nextflow",
+			"host_name":                  "localhost",
+			"head_queue":                 "head",
+			"compute_queue":              "compute",
+			"head_job_options":           "-x something",
+			"propagate_head_job_options": false,
+			"per_job_mem_limit":          true,
+			"per_task_reserve":           true,
+			"port":                       8000,
+			"max_queue_size":             100,
+			"pre_run_script":             "set -x",
+			"post_run_script":            "echo done",
+			"unit_for_limits":            "GB",
+		},
+	}
+
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
+}

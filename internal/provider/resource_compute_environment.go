@@ -236,6 +236,10 @@ func resourceComputeEnvironmentRead(ctx context.Context, d *schema.ResourceData,
 		config := computeEnv["config"].(client.ComputeEnvAWSBatchConfig)
 		d.Set("aws_batch", flattenComputeEnvironmentAWSBatch(ctx, &config))
 		d.Set("environment_variable", flattenComputeEnvironmentVariables(config.Environment))
+	case "lsf-platform":
+		config := computeEnv["config"].(client.ComputeEnvLSFPlatformConfig)
+		d.Set("lsf_platform", flattenComputeEnvironmentLSFPlatform(ctx, &config))
+		d.Set("environment_variable", flattenComputeEnvironmentVariables(config.Environment))
 	default:
 		return diag.Errorf("unsupported platform type: %s", computeEnv["platform"].(string))
 	}
