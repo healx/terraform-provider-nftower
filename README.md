@@ -65,3 +65,24 @@ If you wish to make a release, you must tag a commit with the version you wish t
 git tag v1.2.3
 git push origin v1.2.3
 ```
+
+## Contributing
+
+Pull requests are always welcome! Please follow a few guidelines:
+
+- If you update the documentation please re-renerate it using `go generate ./...` and commit the changes.
+
+### Contributors
+
+<!---
+table generated using https://contributors-table-generator.vercel.app/
+-->
+
+<table>
+   <tr>
+      <td align="center"><a href="https://github.com/gareth-rogers-healx"><img alt="gareth-rogers-healx" src="https://avatars.githubusercontent.com/u/68058406?v=4" width="117" /><br />gareth-rogers-healx</a></td>
+      <td align="center"><a href="https://github.com/andyroyle"><img alt="andyroyle" src="https://avatars.githubusercontent.com/u/1472779?v=4" width="117" /><br />andyroyle</a></td>
+      <td align="center"><a href="https://github.com/simon-turnbull-healx"><img alt="simon-turnbull-healx" src="https://avatars.githubusercontent.com/u/99724107?v=4" width="117" /><br />simon-turnbull-healx</a></td>
+      <td align="center"><a href="https://github.com/timini"><img alt="timini" src="https://avatars.githubusercontent.com/u/247302?v=4" width="117" /><br />timini</a></td>
+   </tr>
+</table>
