@@ -6,5 +6,5 @@ resource "nftower_workspace" "example" {
 resource "nftower_pipeline_secrets" "secret" {
   name         = "PIPELINE_SECRET"
   workspace_id = nftower_workspace.example.id
-  value = "some secret value"
+  value        = "some secret value"
 }
