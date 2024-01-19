@@ -190,6 +190,15 @@ func resourceComputeEnvironmentCreate(ctx context.Context, d *schema.ResourceDat
 			d.Get("credentials_id").(string),
 			expandComputeEnvironmentAWSBatch(ctx, d),
 		)
+	} else if _, ok := d.GetOk("lsf_platform"); ok {
+		id, err = tower_client.CreateLSFPlatformComputeEnv(
+			ctx,
+			d.Get("workspace_id").(string),
+			d.Get("name").(string),
+			d.Get("description").(string),
+			d.Get("credentials_id").(string),
+			expandComputeEnvironmentLSFPlatform(ctx, d),
+		)
 	}
 
 	if err != nil {
@@ -226,6 +235,10 @@ func resourceComputeEnvironmentRead(ctx context.Context, d *schema.ResourceData,
 	case "aws-batch":
 		config := computeEnv["config"].(client.ComputeEnvAWSBatchConfig)
 		d.Set("aws_batch", flattenComputeEnvironmentAWSBatch(ctx, &config))
+		d.Set("environment_variable", flattenComputeEnvironmentVariables(config.Environment))
+	case "lsf-platform":
+		config := computeEnv["config"].(client.ComputeEnvLSFPlatformConfig)
+		d.Set("lsf_platform", flattenComputeEnvironmentLSFPlatform(ctx, &config))
 		d.Set("environment_variable", flattenComputeEnvironmentVariables(config.Environment))
 	default:
 		return diag.Errorf("unsupported platform type: %s", computeEnv["platform"].(string))
@@ -323,6 +336,98 @@ func flattenComputeEnvironmentAWSBatch(ctx context.Context, config *client.Compu
 
 	if config.PostRunScript != "" {
 		flattened["post_run_script"] = config.PostRunScript
+	}
+
+	v := make([]interface{}, 1)
+	v[0] = flattened
+
+	return v
+}
+
+func expandComputeEnvironmentLSFPlatform(ctx context.Context, d *schema.ResourceData) *client.ComputeEnvLSFPlatformConfig {
+	lsfPlatformConfig := &client.ComputeEnvLSFPlatformConfig{
+		WorkDir:                 d.Get("lsf_platform.0.workDir").(string),
+		LaunchDir:               d.Get("lsf_platform.0.launchDir").(string),
+		UserName:                d.Get("lsf_platform.0.userName").(string),
+		HostName:                d.Get("lsf_platform.0.hostName").(string),
+		HeadQueue:               d.Get("lsf_platform.0.headQueue").(string),
+		ComputeQueue:            d.Get("lsf_platform.0.computeQueue").(string),
+		HeadJobOptions:          d.Get("lsf_platform.0.headJobOptions").(string),
+		PropagateHeadJobOptions: d.Get("lsf_platform.0.propagateHeadJobOptions").(bool),
+		Environment:             expandComputeEnvironmentVariables(d),
+	}
+
+	// port
+	if v, ok := d.GetOk("lsf_platform.0.port"); ok {
+		lsfPlatformConfig.Port = v.(int)
+	}
+
+	// maxQueueSize
+	if v, ok := d.GetOk("lsf_platform.0.maxQueueSize"); ok {
+		lsfPlatformConfig.MaxQueueSize = v.(int)
+	}
+
+	// preRunScript
+	if v, ok := d.GetOk("lsf_platform.0.preRunScript"); ok {
+		lsfPlatformConfig.PreRunScript = v.(string)
+	}
+
+	// postRunScript
+	if v, ok := d.GetOk("lsf_platform.0.postRunScript"); ok {
+		lsfPlatformConfig.PostRunScript = v.(string)
+	}
+
+	// unitForLimits
+	if v, ok := d.GetOk("lsf_platform.0.unitForLimits"); ok {
+		lsfPlatformConfig.UnitForLimits = v.(string)
+	}
+
+	// perJobMemLimits
+	if v, ok := d.GetOk("lsf_platform.0.perJobMemLimits"); ok {
+		lsfPlatformConfig.PerJobMemLimit = v.(bool)
+	}
+
+	// perTaskReserve
+	if v, ok := d.GetOk("lsf_platform.0.perTaskReserve"); ok {
+		lsfPlatformConfig.PerTaskReserve = v.(bool)
+	}
+
+	return lsfPlatformConfig
+}
+
+func flattenComputeEnvironmentLSFPlatform(ctx context.Context, config *client.ComputeEnvLSFPlatformConfig) []interface{} {
+
+	flattened := map[string]interface{}{
+		"work_dir":                   config.WorkDir,
+		"launch_dir":                 config.LaunchDir,
+		"user_name":                  config.UserName,
+		"host_name":                  config.HostName,
+		"head_queue":                 config.HeadQueue,
+		"compute_queue":              config.ComputeQueue,
+		"head_job_options":           config.HeadJobOptions,
+		"propagate_head_job_options": config.PropagateHeadJobOptions,
+		"per_job_mem_limit":          config.PerJobMemLimit,
+		"per_task_reserve":           config.PerTaskReserve,
+	}
+
+	if config.Port != 0 {
+		flattened["port"] = config.Port
+	}
+
+	if config.MaxQueueSize != 0 {
+		flattened["max_queue_size"] = config.MaxQueueSize
+	}
+
+	if config.PreRunScript != "" {
+		flattened["pre_run_script"] = config.PreRunScript
+	}
+
+	if config.PostRunScript != "" {
+		flattened["post_run_script"] = config.PostRunScript
+	}
+
+	if config.UnitForLimits != "" {
+		flattened["unit_for_limits"] = config.UnitForLimits
 	}
 
 	v := make([]interface{}, 1)
