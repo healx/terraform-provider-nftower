@@ -14,7 +14,7 @@ func TestAccResourcePipelineSecrets(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				ResourceName: "nftower_credentials",
+				ResourceName: "nftower_pipeline_secrets",
 				Config:       template.ParseRandName(testAccResourcePipelineSecrets),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -36,7 +36,7 @@ func TestAccResourcePipelineSecrets(t *testing.T) {
 const testAccResourcePipelineSecrets = `
 resource "nftower_workspace" "foo" {
   name        = "tf-acceptance-{{.randName}}"
-  full_name   = "tf acceptance testing credentials"
+  full_name   = "tf acceptance testing pipeline secrets"
 	
   description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
   visibility  = "PRIVATE"
