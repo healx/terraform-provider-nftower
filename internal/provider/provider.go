@@ -45,6 +45,7 @@ func New(version string) func() *schema.Provider {
 				"nftower_organization_member":   dataSourceOrganizationMember(),
 				"nftower_workspace_participant": dataSourceWorkspaceParticipant(),
 				"nftower_pipeline":              dataSourcePipeline(),
+				"nftower_pipeline_secrets":      dataSourcePipelineSecrets(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"nftower_workspace":             resourceWorkspace(),
@@ -57,6 +58,7 @@ func New(version string) func() *schema.Provider {
 				"nftower_action":                resourceAction(),
 				"nftower_token":                 resourceToken(),
 				"nftower_pipeline":              resourcePipeline(),
+				"nftower_pipeline_secrets":      resourcePipelineSecrets(),
 			},
 		}
 
