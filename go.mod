@@ -1,6 +1,6 @@
 module github.com/healx/terraform-provider-nftower
 
-go 1.18
+go 1.20
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.3
