@@ -7,7 +7,7 @@ For detailed documentation see the [registry page](https://registry.terraform.io
 ## Requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) >= 0.13.x
--	[Go](https://golang.org/doc/install) >= 1.18
+-	[Go](https://golang.org/doc/install) >= 1.20
 
 ## Building The Provider
 
