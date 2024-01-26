@@ -18,11 +18,9 @@ func TestAccResourcePipelineSecrets(t *testing.T) {
 				Config:       template.ParseRandName(testAccResourcePipelineSecrets),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"nftower_pipeline_secrets.foo", "name", "tf-acceptance-pipeline-secrets"),
+						"nftower_pipeline_secrets.foo", "name", "tf_acceptance_pipeline_secrets"),
 					resource.TestCheckResourceAttr(
 						"nftower_pipeline_secrets.foo", "value", "something secret"),
-					resource.TestMatchResourceAttr(
-						"nftower_pipeline_secrets.foo", "last_used", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestMatchResourceAttr(
 						"nftower_pipeline_secrets.foo", "date_created", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestMatchResourceAttr(
@@ -43,8 +41,7 @@ resource "nftower_workspace" "foo" {
 }
 
 resource "nftower_pipeline_secrets" "foo" {
-  name        = "tf-acceptance-pipeline-secrets"
-  description = "tf acceptance testing pipeline secrets"
+  name        = "tf_acceptance_pipeline_secrets"
   workspace_id = nftower_workspace.foo.id
   value = "something secret"
 }

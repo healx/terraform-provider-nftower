@@ -53,7 +53,7 @@ func NewTowerClient(ctx context.Context, userAgent string, apiKey string, apiUrl
 	c := &TowerClient{
 		userAgent: userAgent,
 		apiKey:    apiKey,
-		apiUrl:    u.ResolveReference(&url.URL{Path: "/"}),
+		apiUrl:    u,
 		http:      httpClient,
 	}
 
@@ -161,7 +161,7 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 	req, err := retryablehttp.NewRequestWithContext(
 		ctx,
 		method,
-		c.apiUrl.ResolveReference(&url.URL{Path: path, RawQuery: querystring}).String(),
+		c.apiUrl.ResolveReference(&url.URL{Path: c.apiUrl.JoinPath(path).Path, RawQuery: querystring}).String(),
 		payload)
 
 	if err != nil {

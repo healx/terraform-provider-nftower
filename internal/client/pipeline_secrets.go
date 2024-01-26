@@ -26,9 +26,11 @@ func (c *TowerClient) CreatePipelineSecrets(
 		return "", fmt.Errorf("empty response from server")
 	}
 
-	secrets := res.(map[string]string)
+	secrets := res.(map[string]interface{})
 
-	return secrets["secretId"], nil
+	secretId := fmt.Sprintf("%.0f", secrets["secretId"].(float64))
+
+	return secretId, nil
 }
 
 func (c *TowerClient) GetPipelineSecretByName(ctx context.Context, workspaceId string, name string) (map[string]interface{}, error) {
