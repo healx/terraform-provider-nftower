@@ -1,14 +1,26 @@
 package provider
 
 import (
+	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/healx/terraform-provider-nftower/internal/template"
 )
 
+func getApiUrl() string {
+	apiUrl := os.Getenv("NFTOWER_API_URL")
+	if apiUrl == "" {
+		apiUrl = "https://api.tower.nf"
+	}
+	apiUrl = strings.TrimRight(apiUrl, "/")
+	return apiUrl
+}
+
 func TestAccResourceDatasetVersion_csv(t *testing.T) {
+	apiUrl := getApiUrl()
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
@@ -28,7 +40,7 @@ func TestAccResourceDatasetVersion_csv(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"nftower_dataset_version.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestMatchResourceAttr(
-						"nftower_dataset_version.foo", "url", regexp.MustCompile("^https://api.tower.nf/workspaces/[0-9]+/datasets/[0-9A-Za-z]+/v/[0-9]+/n/foo.csv$")),
+						"nftower_dataset_version.foo", "url", regexp.MustCompile("^"+apiUrl+"/workspaces/[0-9]+/datasets/[0-9A-Za-z]+/v/[0-9]+/n/foo.csv$")),
 				),
 			},
 		},
@@ -63,6 +75,7 @@ EOF
 `
 
 func TestAccResourceDatasetVersion_tsv(t *testing.T) {
+	apiUrl := getApiUrl()
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
@@ -82,7 +95,7 @@ func TestAccResourceDatasetVersion_tsv(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"nftower_dataset_version.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestMatchResourceAttr(
-						"nftower_dataset_version.foo", "url", regexp.MustCompile("^https://api.tower.nf/workspaces/[0-9]+/datasets/[0-9A-Za-z]+/v/[0-9]+/n/foo.tsv$")),
+						"nftower_dataset_version.foo", "url", regexp.MustCompile("^"+apiUrl+"/workspaces/[0-9]+/datasets/[0-9A-Za-z]+/v/[0-9]+/n/foo.tsv$")),
 				),
 			},
 		},

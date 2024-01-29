@@ -18,7 +18,7 @@ func TestAccResourceToken(t *testing.T) {
 				Config:       template.ParseRandName(testAccResourceToken),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
-						"nftower_token.foo", "token", regexp.MustCompile("^[A-Za-z0-9]{32,}$")),
+						"nftower_token.foo", "token", regexp.MustCompile(`^[A-Za-z0-9\-\._~\+\/]+=*$`)),
 					resource.TestMatchResourceAttr(
 						"nftower_token.foo", "name", regexp.MustCompile("^tf-acceptance-[0-9]+$")),
 					resource.TestMatchResourceAttr(

@@ -86,7 +86,9 @@ func resourcePipelineSecretsRead(ctx context.Context, d *schema.ResourceData, me
 
 	d.Set("name", pipelineSecret["name"].(string))
 
-	d.Set("last_used", pipelineSecret["lastUsed"].(string))
+	if v, ok := pipelineSecret["lastUsed"].(string); ok {
+		d.Set("last_used", v)
+	}
 
 	d.Set("date_created", pipelineSecret["dateCreated"].(string))
 	d.Set("last_updated", pipelineSecret["lastUpdated"].(string))
