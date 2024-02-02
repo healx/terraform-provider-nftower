@@ -55,6 +55,56 @@ func (c *TowerClient) CreateCredentialsGithub(
 	return c.createCredentials(ctx, workspaceId, payload)
 }
 
+func (c *TowerClient) CreateCredentialsGitlab(
+	ctx context.Context,
+	workspaceId string,
+	name string,
+	description string,
+	baseUrl string,
+	username string,
+	password string,
+	token string) (string, error) {
+
+	payload := map[string]interface{}{
+		"credentials": map[string]interface{}{
+			"name":        name,
+			"description": description,
+			"provider":    "gitlab",
+			"baseUrl":     baseUrl,
+			"keys": map[string]interface{}{
+				"username": username,
+				"password": password,
+				"token":    token,
+			},
+		},
+	}
+
+	return c.createCredentials(ctx, workspaceId, payload)
+}
+
+func (c *TowerClient) CreateCredentialsSSH(
+	ctx context.Context,
+	workspaceId string,
+	name string,
+	description string,
+	sshKey string,
+	sshKeyPassphrase string) (string, error) {
+
+	payload := map[string]interface{}{
+		"credentials": map[string]interface{}{
+			"name":        name,
+			"description": description,
+			"provider":    "ssh",
+			"keys": map[string]interface{}{
+				"privateKey": sshKey,
+				"passphrase": sshKeyPassphrase,
+			},
+		},
+	}
+
+	return c.createCredentials(ctx, workspaceId, payload)
+}
+
 func (c *TowerClient) createCredentials(ctx context.Context, workspaceId string, payload map[string]interface{}) (string, error) {
 	res, err := c.requestWithJsonPayload(ctx, "POST", "/credentials", map[string]string{"workspaceId": workspaceId}, payload)
 

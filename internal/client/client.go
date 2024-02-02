@@ -176,13 +176,26 @@ func (c *TowerClient) request(ctx context.Context, method string, path string, q
 
 	tflog.Trace(ctx, fmt.Sprintf("header: Content-Type: %s", req.Header.Get("Content-Type")))
 
+	fmt.Println("=== request ===")
+	fmt.Println("method: ", method)
+	fmt.Println("url: ", c.apiUrl.ResolveReference(&url.URL{Path: c.apiUrl.JoinPath(path).Path, RawQuery: querystring}).String())
+	fmt.Println("headers: ", formatHeaders(req.Header))
+	fmt.Println("request payload: ", payload)
+
 	httpResp, err := c.http.Do(req)
 	if err != nil {
+		fmt.Println("!!!!! FAILED !!!!!!")
+		fmt.Println("=== end request ===")
+
 		return nil, err
 	}
 
 	var resp interface{}
 	body, err := io.ReadAll(httpResp.Body)
+
+	fmt.Println("body: ", string(body))
+	fmt.Println("status: ", httpResp.Status)
+	fmt.Println("=== end request ===")
 
 	if err != nil {
 		return nil, err

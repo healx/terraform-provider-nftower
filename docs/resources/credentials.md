@@ -52,6 +52,8 @@ resource "nftower_credentials" "github" {
 - `aws` (Block List, Max: 1) Stores an AWS IAM access key. (see [below for nested schema](#nestedblock--aws))
 - `description` (String) The description of the credentials.
 - `github` (Block List, Max: 1) Stores a github access token. (see [below for nested schema](#nestedblock--github))
+- `gitlab` (Block List, Max: 1) Stores a gitlab access token. (see [below for nested schema](#nestedblock--gitlab))
+- `ssh` (Block List, Max: 1) Stores an SSH private key. (see [below for nested schema](#nestedblock--ssh))
 
 ### Read-Only
 
@@ -83,3 +85,29 @@ Required:
 Optional:
 
 - `base_url` (String) The base url when connecting to github. Used for github enterprise on-prem.
+
+
+<a id="nestedblock--gitlab"></a>
+### Nested Schema for `gitlab`
+
+Required:
+
+- `password` (String, Sensitive) The personal access token to use to connect to gitlab.
+- `token` (String, Sensitive) The personal access token to use to connect to gitlab.
+- `username` (String) The name of the user that the token belongs.
+
+Optional:
+
+- `base_url` (String) The base url when connecting to github. Used for github enterprise on-prem.
+
+
+<a id="nestedblock--ssh"></a>
+### Nested Schema for `ssh`
+
+Required:
+
+- `private_key` (String, Sensitive) The SSH private key.
+
+Optional:
+
+- `passphrase` (String, Sensitive) The passphrase for the SSH private key.

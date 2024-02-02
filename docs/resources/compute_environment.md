@@ -32,7 +32,7 @@ resource "nftower_credentials" "aws" {
 resource "nftower_compute_environment" "example-awsbatch" {
   name           = "example-awsbatch"
   workspace_id   = nftower_workspace.example.id
-  credentials_id = nftower_workspace.aws.id
+  credentials_id = nftower_credentials.aws.id
 
   aws_batch {
     region        = "eu-west-1"
@@ -42,10 +42,19 @@ resource "nftower_compute_environment" "example-awsbatch" {
   }
 }
 
+resource "nftower_credentials" "lsf_submission_ssh_key" {
+  name         = "lsf-submission-ssh-key"
+  workspace_id = nftower_workspace.example.id
+
+  ssh {
+    private_key = "private key"
+  }
+}
+
 resource "nftower_compute_environment" "example-lsfplatform" {
   name           = "example-lsfplatform"
   workspace_id   = nftower_workspace.example.id
-  credentials_id = nftower_workspace.aws.id
+  credentials_id = nftower_credentials.lsf_submission_ssh_key.id
 
   lsf_platform {
     work_dir      = "s3://my-nf-workdir"
@@ -69,6 +78,7 @@ resource "nftower_compute_environment" "example-lsfplatform" {
 - `aws_batch` (Block List, Max: 1) Configures an AWS Batch compute environment (manual only). (see [below for nested schema](#nestedblock--aws_batch))
 - `description` (String) The description of the environment.
 - `environment_variable` (Block List) A List of environment variables that can be included for head or compute jobs. (see [below for nested schema](#nestedblock--environment_variable))
+- `lsf_platform` (Block List, Max: 1) Configures an IBM LSF compute environment. (see [below for nested schema](#nestedblock--lsf_platform))
 
 ### Read-Only
 
@@ -107,3 +117,28 @@ Required:
 - `name` (String) The name of the environment variable must contain only alphanumeric, dash and underscore characters, and cannot begin with a number.
 - `value` (String) The value of the environment variable.
 - `visibility` (String) Which jobs this environment variable should be available to, can be HEAD, COMPUTE or BOTH.
+
+
+<a id="nestedblock--lsf_platform"></a>
+### Nested Schema for `lsf_platform`
+
+Required:
+
+- `compute_queue` (String) The default LSF queue to which Nextflow will submit job executions. This can be overwritten via the usual Nextflow config.
+- `head_job_options` (String) options to add to BSUB when submitting the head job.
+- `head_queue` (String) The LSF queue that will run the Nextflow application. A queue that does not use spot instances is expected.
+- `host_name` (String) hostname of the login node for your IBM LSF cluster.
+- `launch_dir` (String) The directory where tower will launch workflows.
+- `per_job_mem_limit` (Boolean) Enable per-job mem limits.
+- `per_task_reserve` (Boolean) Enable per task reserve.
+- `propagate_head_job_options` (Boolean) Whether to propagate the head job optoins to spawned worker jobs or not.
+- `user_name` (String) IBM LSF username to use.
+- `work_dir` (String) The nextflow work directory.
+
+Optional:
+
+- `max_queue_size` (Number) Max size of queue.
+- `port` (Number) The port for ssh connection.
+- `post_run_script` (String) script to run on submission node after running nextflow.
+- `pre_run_script` (String) script to run on submission node before running nextflow.
+- `unit_for_limits` (String) the unit to use for limits.
