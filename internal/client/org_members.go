@@ -14,23 +14,22 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 
 	res, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/add", c.orgId), nil, payload)
 
-	towerErr, ok := err.(towerError)
-	if ok {
-		// If user already exists, update role
-		if towerErr.statusCode == 409 {
-			member, err = c.GetOrganizationMember(ctx, email)
-		}
-		if err != nil {
-			return -1, err
+	if err != nil {
+		towerErr, ok := err.(towerError)
+		if ok {
+			// If user already exists, update role
+			if towerErr.statusCode == 409 {
+				member, err = c.GetOrganizationMember(ctx, email)
+			}
+			if err != nil {
+				return -1, err
+			}
+		} else {
+			if res == nil {
+				return -1, fmt.Errorf("Empty response from server")
+			}
 		}
 	} else {
-		if err != nil {
-			return -1, err
-		}
-
-		if res == nil {
-			return -1, fmt.Errorf("Empty response from server")
-		}
 		memberObj := res.(map[string]interface{})
 		member = memberObj["member"].(map[string]interface{})
 	}
