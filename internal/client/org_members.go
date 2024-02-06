@@ -25,11 +25,12 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 				return -1, err
 			}
 		} else {
-			if res == nil {
-				return -1, fmt.Errorf("Empty response from server")
-			}
+			return -1, err
 		}
 	} else {
+		if res == nil {
+			return -1, fmt.Errorf("Empty response from server")
+		}
 		memberObj := res.(map[string]interface{})
 		member = memberObj["member"].(map[string]interface{})
 	}
