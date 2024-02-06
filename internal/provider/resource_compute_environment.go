@@ -60,11 +60,12 @@ func resourceComputeEnvironment() *schema.Resource {
 				Computed:    true,
 			},
 			"aws_batch": {
-				Description: "Configures an AWS Batch compute environment (manual only).",
-				Type:        schema.TypeList,
-				Optional:    true,
-				ForceNew:    true,
-				MaxItems:    1,
+				Description:   "Configures an AWS Batch compute environment (manual only).",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"lsf_platform"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"region": {
@@ -137,6 +138,108 @@ func resourceComputeEnvironment() *schema.Resource {
 						"head_job_memory_mb": {
 							Type:        schema.TypeInt,
 							Description: "The number of MiB of memory reserved for the Nextflow runner job.",
+							Optional:    true,
+							ForceNew:    true,
+						},
+					},
+				},
+			},
+			"lsf_platform": {
+				Description:   "Configures an IBM LSF compute environment.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"aws_batch"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"work_dir": {
+							Type:        schema.TypeString,
+							Description: "The nextflow work directory.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"launch_dir": {
+							Type:        schema.TypeString,
+							Description: "The directory where tower will launch workflows.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"user_name": {
+							Type:        schema.TypeString,
+							Description: "IBM LSF username to use.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"host_name": {
+							Type:        schema.TypeString,
+							Description: "hostname of the login node for your IBM LSF cluster.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"head_queue": {
+							Type:        schema.TypeString,
+							Description: "The LSF queue that will run the Nextflow application. A queue that does not use spot instances is expected.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"compute_queue": {
+							Type:        schema.TypeString,
+							Description: "The default LSF queue to which Nextflow will submit job executions. This can be overwritten via the usual Nextflow config.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"head_job_options": {
+							Type:        schema.TypeString,
+							Description: "options to add to BSUB when submitting the head job.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"propagate_head_job_options": {
+							Type:        schema.TypeBool,
+							Description: "Whether to propagate the head job optoins to spawned worker jobs or not.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"per_job_mem_limit": {
+							Type:        schema.TypeBool,
+							Description: "Enable per-job mem limits.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"per_task_reserve": {
+							Type:        schema.TypeBool,
+							Description: "Enable per task reserve.",
+							Required:    true,
+							ForceNew:    true,
+						},
+						"port": {
+							Type:        schema.TypeInt,
+							Description: "The port for ssh connection.",
+							Optional:    true,
+							ForceNew:    true,
+						},
+						"max_queue_size": {
+							Type:        schema.TypeInt,
+							Description: "Max size of queue.",
+							Optional:    true,
+							ForceNew:    true,
+						},
+						"pre_run_script": {
+							Type:        schema.TypeString,
+							Description: "script to run on submission node before running nextflow.",
+							Optional:    true,
+							ForceNew:    true,
+						},
+						"post_run_script": {
+							Type:        schema.TypeString,
+							Description: "script to run on submission node after running nextflow.",
+							Optional:    true,
+							ForceNew:    true,
+						},
+						"unit_for_limits": {
+							Type:        schema.TypeString,
+							Description: "the unit to use for limits.",
 							Optional:    true,
 							ForceNew:    true,
 						},
@@ -346,14 +449,14 @@ func flattenComputeEnvironmentAWSBatch(ctx context.Context, config *client.Compu
 
 func expandComputeEnvironmentLSFPlatform(ctx context.Context, d *schema.ResourceData) *client.ComputeEnvLSFPlatformConfig {
 	lsfPlatformConfig := &client.ComputeEnvLSFPlatformConfig{
-		WorkDir:                 d.Get("lsf_platform.0.workDir").(string),
-		LaunchDir:               d.Get("lsf_platform.0.launchDir").(string),
-		UserName:                d.Get("lsf_platform.0.userName").(string),
-		HostName:                d.Get("lsf_platform.0.hostName").(string),
-		HeadQueue:               d.Get("lsf_platform.0.headQueue").(string),
-		ComputeQueue:            d.Get("lsf_platform.0.computeQueue").(string),
-		HeadJobOptions:          d.Get("lsf_platform.0.headJobOptions").(string),
-		PropagateHeadJobOptions: d.Get("lsf_platform.0.propagateHeadJobOptions").(bool),
+		WorkDir:                 d.Get("lsf_platform.0.work_dir").(string),
+		LaunchDir:               d.Get("lsf_platform.0.launch_dir").(string),
+		UserName:                d.Get("lsf_platform.0.user_name").(string),
+		HostName:                d.Get("lsf_platform.0.host_name").(string),
+		HeadQueue:               d.Get("lsf_platform.0.head_queue").(string),
+		ComputeQueue:            d.Get("lsf_platform.0.compute_queue").(string),
+		HeadJobOptions:          d.Get("lsf_platform.0.head_job_options").(string),
+		PropagateHeadJobOptions: d.Get("lsf_platform.0.propagate_head_job_options").(bool),
 		Environment:             expandComputeEnvironmentVariables(d),
 	}
 
@@ -363,32 +466,32 @@ func expandComputeEnvironmentLSFPlatform(ctx context.Context, d *schema.Resource
 	}
 
 	// maxQueueSize
-	if v, ok := d.GetOk("lsf_platform.0.maxQueueSize"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.max_queue_size"); ok {
 		lsfPlatformConfig.MaxQueueSize = v.(int)
 	}
 
 	// preRunScript
-	if v, ok := d.GetOk("lsf_platform.0.preRunScript"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.pre_run_script"); ok {
 		lsfPlatformConfig.PreRunScript = v.(string)
 	}
 
 	// postRunScript
-	if v, ok := d.GetOk("lsf_platform.0.postRunScript"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.post_run_script"); ok {
 		lsfPlatformConfig.PostRunScript = v.(string)
 	}
 
 	// unitForLimits
-	if v, ok := d.GetOk("lsf_platform.0.unitForLimits"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.unit_for_limits"); ok {
 		lsfPlatformConfig.UnitForLimits = v.(string)
 	}
 
 	// perJobMemLimits
-	if v, ok := d.GetOk("lsf_platform.0.perJobMemLimits"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.per_job_mem_limits"); ok {
 		lsfPlatformConfig.PerJobMemLimit = v.(bool)
 	}
 
 	// perTaskReserve
-	if v, ok := d.GetOk("lsf_platform.0.perTaskReserve"); ok {
+	if v, ok := d.GetOk("lsf_platform.0.per_task_reserve"); ok {
 		lsfPlatformConfig.PerTaskReserve = v.(bool)
 	}
 

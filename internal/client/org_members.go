@@ -6,6 +6,7 @@ import (
 )
 
 func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string, role string) (int64, error) {
+	var member map[string]interface{}
 
 	payload := map[string]interface{}{
 		"user": email,
@@ -14,15 +15,25 @@ func (c *TowerClient) CreateOrganizationMember(ctx context.Context, email string
 	res, err := c.requestWithJsonPayload(ctx, "PUT", fmt.Sprintf("/orgs/%d/members/add", c.orgId), nil, payload)
 
 	if err != nil {
-		return -1, err
+		towerErr, ok := err.(towerError)
+		if ok {
+			// If user already exists, update role
+			if towerErr.statusCode == 409 {
+				member, err = c.GetOrganizationMember(ctx, email)
+			}
+			if err != nil {
+				return -1, err
+			}
+		} else {
+			return -1, err
+		}
+	} else {
+		if res == nil {
+			return -1, fmt.Errorf("Empty response from server")
+		}
+		memberObj := res.(map[string]interface{})
+		member = memberObj["member"].(map[string]interface{})
 	}
-
-	if res == nil {
-		return -1, fmt.Errorf("Empty response from server")
-	}
-
-	memberObj := res.(map[string]interface{})
-	member := memberObj["member"].(map[string]interface{})
 
 	memberId := int64(member["memberId"].(float64))
 

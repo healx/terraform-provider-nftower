@@ -63,7 +63,7 @@ func (c *TowerClient) CreateLSFPlatformComputeEnv(
 		"computeEnv": map[string]interface{}{
 			"name":          name,
 			"description":   description,
-			"platform":      "aws-batch",
+			"platform":      "lsf-platform",
 			"credentialsId": credentialsId,
 			"config":        marshalComputeEnvLSFPlatformConfig(config),
 		},

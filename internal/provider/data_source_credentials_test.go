@@ -111,3 +111,58 @@ data "nftower_credentials" "foo" {
 	workspace_id = nftower_credentials.foo.workspace_id
 }
 `
+
+func TestAccDataSourceCredentialsGitlab(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: template.ParseRandName(testAccDataSourceCredentialsGitlab),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "name", "tf-acceptance-credentials-ds-gitlab"),
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "description", "tf acceptance testing gitlab ds credentials"),
+					resource.TestMatchResourceAttr(
+						"data.nftower_credentials.foo", "date_created", regexp.MustCompile("^[0-9-:TZ]+")),
+					resource.TestMatchResourceAttr(
+						"data.nftower_credentials.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "gitlab.0.username", "foo"),
+					resource.TestCheckNoResourceAttr(
+						"data.nftower_credentials.foo", "gitlab.0.password"),
+					resource.TestCheckNoResourceAttr(
+						"data.nftower_credentials.foo", "gitlab.0.token"),
+				),
+			},
+		},
+	})
+}
+
+const testAccDataSourceCredentialsGitlab = `
+resource "nftower_workspace" "foo" {
+  name        = "tf-acceptance-{{.randName}}"
+  full_name   = "tf acceptance testing ds credentials"
+	
+  description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_credentials" "foo" {
+  name        = "tf-acceptance-credentials-ds-gitlab"
+  description = "tf acceptance testing gitlab ds credentials"
+  workspace_id = nftower_workspace.foo.id
+
+  gitlab {
+	username     = "foo"
+	password     = "bar"
+	token        = "baz"
+  }
+}
+
+data "nftower_credentials" "foo" {
+	name = nftower_credentials.foo.name
+	workspace_id = nftower_credentials.foo.workspace_id
+}
+`

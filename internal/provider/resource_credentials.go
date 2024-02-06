@@ -54,7 +54,7 @@ func resourceCredentials() *schema.Resource {
 				Optional:      true,
 				ForceNew:      true,
 				MaxItems:      1,
-				ConflictsWith: []string{"github"},
+				ConflictsWith: []string{"github", "gitlab", "ssh"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"access_key": {
@@ -82,7 +82,7 @@ func resourceCredentials() *schema.Resource {
 				Optional:      true,
 				ForceNew:      true,
 				MaxItems:      1,
-				ConflictsWith: []string{"aws"},
+				ConflictsWith: []string{"aws", "gitlab", "ssh"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
@@ -100,6 +100,64 @@ func resourceCredentials() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "The base url when connecting to github. Used for github enterprise on-prem.",
 							Optional:    true,
+						},
+					},
+				},
+			},
+			"gitlab": {
+				Description:   "Stores a gitlab access token.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"aws", "github", "ssh"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"username": {
+							Type:        schema.TypeString,
+							Description: "The name of the user that the token belongs.",
+							Required:    true,
+						},
+						"password": {
+							Type:        schema.TypeString,
+							Description: "The personal access token to use to connect to gitlab.",
+							Required:    true,
+							Sensitive:   true,
+						},
+						"token": {
+							Type:        schema.TypeString,
+							Description: "The personal access token to use to connect to gitlab.",
+							Required:    true,
+							Sensitive:   true,
+						},
+						"base_url": {
+							Type:        schema.TypeString,
+							Description: "The base url when connecting to github. Used for github enterprise on-prem.",
+							Optional:    true,
+						},
+					},
+				},
+			},
+			"ssh": {
+				Description:   "Stores an SSH private key.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"aws", "github", "gitlab"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"private_key": {
+							Type:        schema.TypeString,
+							Description: "The SSH private key.",
+							Required:    true,
+							Sensitive:   true,
+						},
+						"passphrase": {
+							Type:        schema.TypeString,
+							Description: "The passphrase for the SSH private key.",
+							Optional:    true,
+							Sensitive:   true,
 						},
 					},
 				},
@@ -132,6 +190,26 @@ func resourceCredentialsCreate(ctx context.Context, d *schema.ResourceData, meta
 			d.Get("github.0.base_url").(string),
 			d.Get("github.0.username").(string),
 			d.Get("github.0.access_token").(string),
+		)
+	} else if _, ok := d.GetOk("gitlab"); ok {
+		id, err = towerClient.CreateCredentialsGitlab(
+			ctx,
+			d.Get("workspace_id").(string),
+			d.Get("name").(string),
+			d.Get("description").(string),
+			d.Get("gitlab.0.base_url").(string),
+			d.Get("gitlab.0.username").(string),
+			d.Get("gitlab.0.password").(string),
+			d.Get("gitlab.0.token").(string),
+		)
+	} else if _, ok := d.GetOk("ssh"); ok {
+		id, err = towerClient.CreateCredentialsSSH(
+			ctx,
+			d.Get("workspace_id").(string),
+			d.Get("name").(string),
+			d.Get("description").(string),
+			d.Get("ssh.0.private_key").(string),
+			d.Get("ssh.0.passphrase").(string),
 		)
 	}
 
@@ -203,6 +281,21 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 				},
 			})
 		}
+	case "gitlab":
+		d.Set("gitlab", []interface{}{
+			map[string]interface{}{
+				"username": keys["username"].(string),
+				"password": d.Get("gitlab.0.password").(string),
+				"token":    d.Get("gitlab.0.token").(string),
+			},
+		})
+	case "ssh":
+		d.Set("ssh", []interface{}{
+			map[string]interface{}{
+				"private_key": d.Get("ssh.0.private_key").(string),
+				"passphrase":  d.Get("ssh.0.passphrase").(string),
+			},
+		})
 	default:
 		return diag.Errorf("unsupported credentials type %s", credentials["provider"].(string))
 	}

@@ -37,6 +37,7 @@ data "nftower_credentials" "foo" {
 - `date_created` (String) The datetime the credentials were created.
 - `description` (String) The description of the environment.
 - `github` (List of Object) Stores a github access token. (see [below for nested schema](#nestedatt--github))
+- `gitlab` (List of Object) Stores a gitlab access token. (see [below for nested schema](#nestedatt--gitlab))
 - `id` (String) The ID of this resource.
 - `last_updated` (String) The last updated datetime of the credentials.
 
@@ -51,6 +52,15 @@ Read-Only:
 
 <a id="nestedatt--github"></a>
 ### Nested Schema for `github`
+
+Read-Only:
+
+- `base_url` (String)
+- `username` (String)
+
+
+<a id="nestedatt--gitlab"></a>
+### Nested Schema for `gitlab`
 
 Read-Only:
 

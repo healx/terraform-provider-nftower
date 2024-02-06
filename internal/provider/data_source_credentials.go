@@ -79,6 +79,25 @@ func dataSourceCredentials() *schema.Resource {
 					},
 				},
 			},
+			"gitlab": {
+				Description: "Stores a gitlab access token.",
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"username": {
+							Type:        schema.TypeString,
+							Description: "The name of the user that the token belongs.",
+							Computed:    true,
+						},
+						"base_url": {
+							Type:        schema.TypeString,
+							Description: "The base url when connecting to gitlab. Used for gitlab enterprise on-prem.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -133,6 +152,21 @@ func dataSourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta
 			})
 		} else {
 			d.Set("github", []interface{}{
+				map[string]interface{}{
+					"username": keys["username"].(string),
+				},
+			})
+		}
+	case "gitlab":
+		if baseUrl, ok := credentials["baseUrl"].(string); ok {
+			d.Set("gitlab", []interface{}{
+				map[string]interface{}{
+					"username": keys["username"].(string),
+					"base_url": baseUrl,
+				},
+			})
+		} else {
+			d.Set("gitlab", []interface{}{
 				map[string]interface{}{
 					"username": keys["username"].(string),
 				},
