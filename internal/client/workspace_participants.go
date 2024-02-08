@@ -17,8 +17,11 @@ func (c *TowerClient) CreateWorkspaceParticipant(ctx context.Context, workspaceI
 
 	participantExists := false
 	if err != nil {
-		if err.Error() == fmt.Sprintf("Tower API returned status: 409 Conflict https://api.tower.nf/orgs/%d/workspaces/%s/participants/add {\"message\":\"Already a participant\"}", c.orgId, workspaceId) {
-			participantExists = true
+		towerErr, ok := err.(towerError)
+		if ok {
+			if towerErr.statusCode == 409 {
+				participantExists = true
+			}
 		} else {
 			return -1, "", err
 		}
