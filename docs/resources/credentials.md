@@ -50,7 +50,7 @@ resource "nftower_credentials" "github" {
 ### Optional
 
 - `aws` (Block List, Max: 1) Stores an AWS IAM access key. (see [below for nested schema](#nestedblock--aws))
-- `container_registry` (Block List, Max: 1) Stores an container registry credentials. (see [below for nested schema](#nestedblock--container_registry))
+- `container_registry` (Block List, Max: 1) Stores container registry credentials. (see [below for nested schema](#nestedblock--container_registry))
 - `description` (String) The description of the credentials.
 - `github` (Block List, Max: 1) Stores a github access token. (see [below for nested schema](#nestedblock--github))
 - `gitlab` (Block List, Max: 1) Stores a gitlab access token. (see [below for nested schema](#nestedblock--gitlab))
@@ -85,7 +85,7 @@ Required:
 
 Optional:
 
-- `registry_server` (String) Registry server nam e.g. docker.io
+- `registry_server` (String) Registry server name e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com
 
 
 <a id="nestedblock--github"></a>

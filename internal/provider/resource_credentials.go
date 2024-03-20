@@ -77,7 +77,7 @@ func resourceCredentials() *schema.Resource {
 				},
 			},
 			"container_registry": {
-				Description:   "Stores an container registry credentials.",
+				Description:   "Stores container registry credentials.",
 				Type:          schema.TypeList,
 				Optional:      true,
 				ForceNew:      true,
@@ -98,7 +98,7 @@ func resourceCredentials() *schema.Resource {
 						},
 						"registry_server": {
 							Type:        schema.TypeString,
-							Description: "Registry server nam e.g. docker.io",
+							Description: "Registry server name e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com",
 							Optional:    true,
 						},
 					},
