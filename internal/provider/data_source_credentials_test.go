@@ -37,7 +37,7 @@ const testAccDataSourceCredentialsAWS = `
 resource "nftower_workspace" "foo" {
   name        = "tf-acceptance-{{.randName}}"
   full_name   = "tf acceptance testing ds credentials"
-	
+
   description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
   visibility  = "PRIVATE"
 }
