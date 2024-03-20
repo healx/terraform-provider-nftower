@@ -215,9 +215,9 @@ func resourceCredentialsCreate(ctx context.Context, d *schema.ResourceData, meta
 			d.Get("workspace_id").(string),
 			d.Get("name").(string),
 			d.Get("description").(string),
-			d.Get("registry.0.username").(string),
-			d.Get("registry.0.password").(string),
-			d.Get("registry.0.registry_server").(string),
+			d.Get("container_registry.0.username").(string),
+			d.Get("container_registry.0.password").(string),
+			d.Get("container_registry.0.registry_server").(string),
 		)
 	} else if _, ok := d.GetOk("github"); ok {
 		id, err = towerClient.CreateCredentialsGithub(
@@ -302,6 +302,23 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 				},
 			})
 		}
+	case "container-reg":
+		if registry, ok := credentials["registry"].(string); ok {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username": keys["userName"].(string),
+					"password": d.Get("container_registry.0.password").(string),
+					"container_registry": registry,
+				},
+			})
+		} else {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username": keys["username"].(string),
+					"password": d.Get("container_registry.0.password").(string),
+				},
+			})
+		}
 	case "github":
 		if baseUrl, ok := credentials["baseUrl"].(string); ok {
 			d.Set("github", []interface{}{
@@ -354,6 +371,16 @@ func resourceCredentialsUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.Get("aws.0.access_key").(string),
 			d.Get("aws.0.secret_key").(string),
 			d.Get("aws.0.assume_role_arn").(string),
+		)
+	} else if _, ok := d.GetOk("container_registry"); ok {
+		err = towerClient.UpdateCredentialsContainerRegistry(
+			ctx,
+			d.Id(),
+			d.Get("workspace_id").(string),
+			d.Get("description").(string),
+			d.Get("container_registry.0.username").(string),
+			d.Get("container_registry.0.password").(string),
+			d.Get("container_registry.0.registry_server").(string),
 		)
 	} else if _, ok := d.GetOk("github"); ok {
 		err = towerClient.UpdateCredentialsGithub(

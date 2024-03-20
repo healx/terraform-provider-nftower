@@ -214,18 +214,17 @@ func (c *TowerClient) UpdateCredentialsAWS(
 	return c.updateCredentials(ctx, id, workspaceId, payload)
 }
 
-func (c *TowerClient) UpdateredentialsContainerRegistry(
+func (c *TowerClient) UpdateCredentialsContainerRegistry(
 	ctx context.Context,
 	workspaceId string,
-	name string,
+	id string,
 	description string,
 	username string,
 	password string,
-	registryServer string) (string, error) {
+	registryServer string) error {
 
 	payload := map[string]interface{}{
 		"credentials": map[string]interface{}{
-			"name":        name,
 			"description": description,
 			"provider":    "container-reg",
 			"keys": map[string]interface{}{
@@ -236,7 +235,7 @@ func (c *TowerClient) UpdateredentialsContainerRegistry(
 		},
 	}
 
-	return c.updateCredentials(ctx, workspaceId, payload)
+	return c.updateCredentials(ctx, id, workspaceId, payload)
 }
 
 func (c *TowerClient) UpdateCredentialsGithub(
