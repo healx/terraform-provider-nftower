@@ -30,6 +30,31 @@ func (c *TowerClient) CreateCredentialsAWS(
 	return c.createCredentials(ctx, workspaceId, payload)
 }
 
+func (c *TowerClient) CreateCredentialsContainerRegistry(
+	ctx context.Context,
+	workspaceId string,
+	name string,
+	description string,
+	username string,
+	password string,
+	registryServer string) (string, error) {
+
+	payload := map[string]interface{}{
+		"credentials": map[string]interface{}{
+			"name":        name,
+			"description": description,
+			"provider":    "container-reg",
+			"keys": map[string]interface{}{
+				"userName":     username,
+				"password":     password,
+				"registry": registryServer,
+			},
+		},
+	}
+
+	return c.createCredentials(ctx, workspaceId, payload)
+}
+
 func (c *TowerClient) CreateCredentialsGithub(
 	ctx context.Context,
 	workspaceId string,
@@ -187,6 +212,31 @@ func (c *TowerClient) UpdateCredentialsAWS(
 	}
 
 	return c.updateCredentials(ctx, id, workspaceId, payload)
+}
+
+func (c *TowerClient) UpdateredentialsContainerRegistry(
+	ctx context.Context,
+	workspaceId string,
+	name string,
+	description string,
+	username string,
+	password string,
+	registryServer string) (string, error) {
+
+	payload := map[string]interface{}{
+		"credentials": map[string]interface{}{
+			"name":        name,
+			"description": description,
+			"provider":    "container-reg",
+			"keys": map[string]interface{}{
+				"userName":     username,
+				"password":     password,
+				"registry": registryServer,
+			},
+		},
+	}
+
+	return c.updateCredentials(ctx, workspaceId, payload)
 }
 
 func (c *TowerClient) UpdateCredentialsGithub(
