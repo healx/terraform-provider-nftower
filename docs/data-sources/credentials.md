@@ -34,6 +34,7 @@ data "nftower_credentials" "foo" {
 ### Read-Only
 
 - `aws` (List of Object) Stores an AWS IAM access key. (see [below for nested schema](#nestedatt--aws))
+- `container_registry` (List of Object) Stores an container registry username. (see [below for nested schema](#nestedatt--container_registry))
 - `date_created` (String) The datetime the credentials were created.
 - `description` (String) The description of the environment.
 - `github` (List of Object) Stores a github access token. (see [below for nested schema](#nestedatt--github))
@@ -48,6 +49,15 @@ Read-Only:
 
 - `access_key` (String)
 - `assume_role_arn` (String)
+
+
+<a id="nestedatt--container_registry"></a>
+### Nested Schema for `container_registry`
+
+Read-Only:
+
+- `registry_server` (String)
+- `username` (String)
 
 
 <a id="nestedatt--github"></a>

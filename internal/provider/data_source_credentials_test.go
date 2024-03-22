@@ -37,7 +37,7 @@ const testAccDataSourceCredentialsAWS = `
 resource "nftower_workspace" "foo" {
   name        = "tf-acceptance-{{.randName}}"
   full_name   = "tf acceptance testing ds credentials"
-	
+
   description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
   visibility  = "PRIVATE"
 }
@@ -51,6 +51,61 @@ resource "nftower_credentials" "foo" {
 	access_key      = "foo"
 	secret_key      = "bar"
 	assume_role_arn = "baz"
+  }
+}
+
+data "nftower_credentials" "foo" {
+	name = nftower_credentials.foo.name
+	workspace_id = nftower_credentials.foo.workspace_id
+}
+`
+
+func TestAccDataSourceCredentialsContainerRegistry(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: template.ParseRandName(testAccDataSourceContainerRegistry),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "name", "tf-acceptance-credentials-ds-aws"),
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "description", "tf acceptance testing aws ds credentials"),
+					resource.TestMatchResourceAttr(
+						"data.nftower_credentials.foo", "date_created", regexp.MustCompile("^[0-9-:TZ]+")),
+					resource.TestMatchResourceAttr(
+						"data.nftower_credentials.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "aws.0.username", "foo"),
+					resource.TestCheckNoResourceAttr(
+						"data.nftower_credentials.foo", "aws.0.password"),
+					resource.TestCheckNoResourceAttr(
+						"data.nftower_credentials.foo", "aws.0.registry_server"),
+				),
+			},
+		},
+	})
+}
+
+const testAccDataSourceContainerRegistry = `
+resource "nftower_workspace" "foo" {
+  name        = "tf-acceptance-{{.randName}}"
+  full_name   = "tf acceptance testing ds credentials"
+	
+  description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_credentials" "foo" {
+  name        = "tf-acceptance-credentials-ds-container-registry"
+  description = "tf acceptance testing container registry ds credentials"
+  workspace_id = nftower_workspace.foo.id
+
+  container_registry {
+	username      = "foo"
+	password      = "bar"
+	registry_server = "baz"
   }
 }
 

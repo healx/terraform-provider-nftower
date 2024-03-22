@@ -76,6 +76,34 @@ func resourceCredentials() *schema.Resource {
 					},
 				},
 			},
+			"container_registry": {
+				Description:   "Stores container registry credentials.",
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"github", "gitlab", "ssh"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"username": {
+							Type:        schema.TypeString,
+							Description: "The registry username/access key.",
+							Required:    true,
+						},
+						"password": {
+							Type:        schema.TypeString,
+							Description: "The registry password/secret key.",
+							Required:    true,
+							Sensitive:   true,
+						},
+						"registry_server": {
+							Type:        schema.TypeString,
+							Description: "Registry server name e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com",
+							Optional:    true,
+						},
+					},
+				},
+			},
 			"github": {
 				Description:   "Stores a github access token.",
 				Type:          schema.TypeList,
@@ -181,6 +209,16 @@ func resourceCredentialsCreate(ctx context.Context, d *schema.ResourceData, meta
 			d.Get("aws.0.secret_key").(string),
 			d.Get("aws.0.assume_role_arn").(string),
 		)
+	} else if _, ok := d.GetOk("container_registry"); ok {
+		id, err = towerClient.CreateCredentialsContainerRegistry(
+			ctx,
+			d.Get("workspace_id").(string),
+			d.Get("name").(string),
+			d.Get("description").(string),
+			d.Get("container_registry.0.username").(string),
+			d.Get("container_registry.0.password").(string),
+			d.Get("container_registry.0.registry_server").(string),
+		)
 	} else if _, ok := d.GetOk("github"); ok {
 		id, err = towerClient.CreateCredentialsGithub(
 			ctx,
@@ -264,6 +302,23 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 				},
 			})
 		}
+	case "container-reg":
+		if registry, ok := credentials["registry"].(string); ok {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username": keys["userName"].(string),
+					"password": d.Get("container_registry.0.password").(string),
+					"container_registry": registry,
+				},
+			})
+		} else {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username": keys["username"].(string),
+					"password": d.Get("container_registry.0.password").(string),
+				},
+			})
+		}
 	case "github":
 		if baseUrl, ok := credentials["baseUrl"].(string); ok {
 			d.Set("github", []interface{}{
@@ -316,6 +371,16 @@ func resourceCredentialsUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.Get("aws.0.access_key").(string),
 			d.Get("aws.0.secret_key").(string),
 			d.Get("aws.0.assume_role_arn").(string),
+		)
+	} else if _, ok := d.GetOk("container_registry"); ok {
+		err = towerClient.UpdateCredentialsContainerRegistry(
+			ctx,
+			d.Id(),
+			d.Get("workspace_id").(string),
+			d.Get("description").(string),
+			d.Get("container_registry.0.username").(string),
+			d.Get("container_registry.0.password").(string),
+			d.Get("container_registry.0.registry_server").(string),
 		)
 	} else if _, ok := d.GetOk("github"); ok {
 		err = towerClient.UpdateCredentialsGithub(

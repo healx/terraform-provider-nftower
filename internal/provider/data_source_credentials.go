@@ -60,6 +60,25 @@ func dataSourceCredentials() *schema.Resource {
 					},
 				},
 			},
+			"container_registry": {
+				Description: "Stores an container registry username.",
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"username": {
+							Type:        schema.TypeString,
+							Description: "The container registry username.",
+							Computed:    true,
+						},
+						"registry_server": {
+							Type:        schema.TypeString,
+							Description: "Container registry name.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"github": {
 				Description: "Stores a github access token.",
 				Type:        schema.TypeList,
@@ -139,6 +158,21 @@ func dataSourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta
 			d.Set("aws", []interface{}{
 				map[string]interface{}{
 					"access_key": keys["accessKey"].(string),
+				},
+			})
+		}
+	case "container_registry":
+		if registry, ok := keys["registry"].(string); ok {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username":      keys["userName"].(string),
+					"registry_server": registry,
+				},
+			})
+		} else {
+			d.Set("container_registry", []interface{}{
+				map[string]interface{}{
+					"username": keys["userName"].(string),
 				},
 			})
 		}
