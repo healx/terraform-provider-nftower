@@ -303,18 +303,18 @@ func resourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta a
 			})
 		}
 	case "container-reg":
-		if registry, ok := credentials["registry"].(string); ok {
+		if registry, ok := keys["registry"].(string); ok {
 			d.Set("container_registry", []interface{}{
 				map[string]interface{}{
-					"username": keys["userName"].(string),
-					"password": d.Get("container_registry.0.password").(string),
-					"container_registry": registry,
+					"username":        keys["userName"].(string),
+					"password":        d.Get("container_registry.0.password").(string),
+					"registry_server": registry,
 				},
 			})
 		} else {
 			d.Set("container_registry", []interface{}{
 				map[string]interface{}{
-					"username": keys["username"].(string),
+					"username": keys["userName"].(string),
 					"password": d.Get("container_registry.0.password").(string),
 				},
 			})

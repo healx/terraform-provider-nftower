@@ -60,6 +60,9 @@ data "nftower_credentials" "foo" {
 }
 `
 
+// TestAccDataSourceCredentialsContainerRegistry cannot be run withouth real credentials for accessing the container registry.
+// Seqera Platform test registry connection during the creation of the credentials.
+// For AWS ECR would be username: AWS_ACCESS_KEY_ID), password: AWS_SECRET_ACCESS_KEY, registry_server: AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com
 func TestAccDataSourceCredentialsContainerRegistry(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -69,19 +72,19 @@ func TestAccDataSourceCredentialsContainerRegistry(t *testing.T) {
 				Config: template.ParseRandName(testAccDataSourceContainerRegistry),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"data.nftower_credentials.foo", "name", "tf-acceptance-credentials-ds-aws"),
+						"data.nftower_credentials.foo", "name", "tf-acceptance-credentials-ds-container-registry"),
 					resource.TestCheckResourceAttr(
-						"data.nftower_credentials.foo", "description", "tf acceptance testing aws ds credentials"),
+						"data.nftower_credentials.foo", "description", "tf acceptance testing container registry ds credentials"),
 					resource.TestMatchResourceAttr(
 						"data.nftower_credentials.foo", "date_created", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestMatchResourceAttr(
 						"data.nftower_credentials.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
 					resource.TestCheckResourceAttr(
-						"data.nftower_credentials.foo", "aws.0.username", "foo"),
+						"data.nftower_credentials.foo", "container_registry.0.username", "<<AWS_ACCESS_KEY_ID>>"),
+					resource.TestCheckResourceAttr(
+						"data.nftower_credentials.foo", "container_registry.0.registry_server", "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"),
 					resource.TestCheckNoResourceAttr(
-						"data.nftower_credentials.foo", "aws.0.password"),
-					resource.TestCheckNoResourceAttr(
-						"data.nftower_credentials.foo", "aws.0.registry_server"),
+						"data.nftower_credentials.foo", "container_registry.0.password"),
 				),
 			},
 		},
@@ -91,8 +94,8 @@ func TestAccDataSourceCredentialsContainerRegistry(t *testing.T) {
 const testAccDataSourceContainerRegistry = `
 resource "nftower_workspace" "foo" {
   name        = "tf-acceptance-{{.randName}}"
-  full_name   = "tf acceptance testing ds credentials"
-	
+  full_name   = "tf acceptance container testing ds credentials"
+
   description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
   visibility  = "PRIVATE"
 }
@@ -103,9 +106,9 @@ resource "nftower_credentials" "foo" {
   workspace_id = nftower_workspace.foo.id
 
   container_registry {
-	username      = "foo"
-	password      = "bar"
-	registry_server = "baz"
+	username      = "<<AWS_ACCESS_KEY_ID>>"
+	password      = "<<AWS_SECRET_ACCESS_KEY"
+	registry_server = "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"
   }
 }
 
