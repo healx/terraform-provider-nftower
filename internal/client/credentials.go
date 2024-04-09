@@ -45,8 +45,8 @@ func (c *TowerClient) CreateCredentialsContainerRegistry(
 			"description": description,
 			"provider":    "container-reg",
 			"keys": map[string]interface{}{
-				"userName":     username,
-				"password":     password,
+				"userName": username,
+				"password": password,
 				"registry": registryServer,
 			},
 		},
@@ -228,8 +228,8 @@ func (c *TowerClient) UpdateCredentialsContainerRegistry(
 			"description": description,
 			"provider":    "container-reg",
 			"keys": map[string]interface{}{
-				"userName":     username,
-				"password":     password,
+				"userName": username,
+				"password": password,
 				"registry": registryServer,
 			},
 		},

@@ -161,11 +161,11 @@ func dataSourceCredentialsRead(ctx context.Context, d *schema.ResourceData, meta
 				},
 			})
 		}
-	case "container_registry":
+	case "container-reg":
 		if registry, ok := keys["registry"].(string); ok {
 			d.Set("container_registry", []interface{}{
 				map[string]interface{}{
-					"username":      keys["userName"].(string),
+					"username":        keys["userName"].(string),
 					"registry_server": registry,
 				},
 			})
