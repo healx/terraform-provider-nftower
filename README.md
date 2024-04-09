@@ -49,7 +49,12 @@ To compile the provider, run `go install`. This will build the provider and put 
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`. You will need to specify an api key using `NFTOWER_API_KEY` and an organization using `NFTOWER_ORGANIZATION`
+In order to run the full suite of Acceptance tests, run `make testacc`. 
+
+You will need to specify an api key using `NFTOWER_API_KEY` and an organization using `NFTOWER_ORGANIZATION`. You might need to create a new organisation in
+your Seqera account to use for testing.
+Additionally, for testing container registry resources, you will need use real credentials and to uncomment related [data](./internal/provider/data_source_credentials_test.go#L67)
+and [resource](./internal/provider/resource_credentials_test.go#L64) tests. 
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
