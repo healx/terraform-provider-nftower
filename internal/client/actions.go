@@ -161,7 +161,7 @@ func setOptionalPipelineFields(
 		for _, v := range configProfiles {
 			profiles = append(profiles, v.(string))
 		}
-		payload["workspaceSecrets"] = profiles
+		payload["configProfiles"] = profiles
 	}
 
 	if towerConfig != "" {
