@@ -215,9 +215,9 @@ func (c *TowerClient) UpdateCredentialsAWS(
 }
 
 func (c *TowerClient) UpdateCredentialsContainerRegistry(
-	ctx context.Context,
-	workspaceId string,
+	ctx context.Context,	
 	id string,
+	workspaceId string,
 	description string,
 	username string,
 	password string,
