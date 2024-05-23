@@ -13,7 +13,7 @@ import (
 func getApiUrl() string {
 	apiUrl := os.Getenv("NFTOWER_API_URL")
 	if apiUrl == "" {
-		apiUrl = "https://api.tower.nf"
+		apiUrl = "https://api.cloud.seqera.io"
 	}
 	apiUrl = strings.TrimRight(apiUrl, "/")
 	return apiUrl
