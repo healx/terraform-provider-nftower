@@ -31,6 +31,20 @@ func TestAccResourceCredentialsAWS(t *testing.T) {
 						"nftower_credentials.foo", "aws.0.secret_key", "bar"),
 				),
 			},
+			{
+				ResourceName: "nftower_credentials",
+				Config:       template.ParseRandName(testAccResourceCredentialsAWSUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "name", "tf-acceptance-credentials-aws-updated"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "description", "tf acceptance testing aws credentials updated"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "aws.0.access_key", "foo-updated"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "aws.0.secret_key", "bar-updated"),
+				),
+			},
 		},
 	})
 }
@@ -53,6 +67,28 @@ resource "nftower_credentials" "foo" {
 	access_key      = "foo"
 	secret_key      = "bar"
 	assume_role_arn = "baz"
+  }
+}
+`
+
+const testAccResourceCredentialsAWSUpdated = `
+resource "nftower_workspace" "foo" {
+  name        = "tf-acceptance-{{.randName}}"
+  full_name   = "tf acceptance testing credentials updated"
+
+  description = "Updated by the nftower terraform provider acceptance tests"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_credentials" "foo" {
+  name        = "tf-acceptance-credentials-aws-updated"
+  description = "tf acceptance testing aws credentials updated"
+  workspace_id = nftower_workspace.foo.id
+
+  aws {
+    access_key      = "foo-updated"
+    secret_key      = "bar-updated"
+    assume_role_arn = "baz"
   }
 }
 `
@@ -85,6 +121,24 @@ func TestAccResourceCredentialsContainerRegistry(t *testing.T) {
 						"nftower_credentials.foo", "container_registry.0.registry_server", "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"),
 				),
 			},
+			{
+				ResourceName: "nftower_credentials",
+				Config:       template.ParseRandName(testAccResourceCredentialsContainerRegistryUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "name", "tf-acceptance-credentials-container-registry-updated"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "description", "tf acceptance testing container registry credentials updated"),
+					resource.TestMatchResourceAttr(
+						"nftower_credentials.foo", "last_updated", regexp.MustCompile("^[0-9-:TZ]+")),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "container_registry.0.username", "<<AWS_ACCESS_KEY_ID>>"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "container_registry.0.password", "<<AWS_SECRET_ACCESS_KEY>>"),
+					resource.TestCheckResourceAttr(
+						"nftower_credentials.foo", "container_registry.0.registry_server", "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"),
+				),
+			},
 		},
 	})
 }
@@ -104,8 +158,30 @@ resource "nftower_credentials" "foo" {
   workspace_id = nftower_workspace.foo.id
 
   container_registry {
+	username      = "<<ACCESS_KEY_ID>>"
+	password      = "<<AWS_SECRET_ACCESS_KEY>>"
+	registry_server = "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"
+  }
+}
+`
+
+const testAccResourceCredentialsContainerRegistryUpdated = `
+resource "nftower_workspace" "foo" {
+  name        = "tf-acceptance-{{.randName}}"
+  full_name   = "tf acceptance testing credentials"
+
+  description = "Created by the nftower terraform provider acceptance tests. Will be deleted shortly"
+  visibility  = "PRIVATE"
+}
+
+resource "nftower_credentials" "foo" {
+  name        = "tf-acceptance-credentials-container-registry-updated"
+  description = "tf acceptance testing container registry credentials updated"
+  workspace_id = nftower_workspace.foo.id
+
+  container_registryAWS_ {
 	username      = "<<AWS_ACCESS_KEY_ID>>"
-	password      = "<<AWS_SECRET_ACCESS_KEY"
+	password      = "<<AWS_SECRET_ACCESS_KEY>>"
 	registry_server = "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"
   }
 }

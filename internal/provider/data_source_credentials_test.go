@@ -107,7 +107,7 @@ resource "nftower_credentials" "foo" {
 
   container_registry {
 	username      = "<<AWS_ACCESS_KEY_ID>>"
-	password      = "<<AWS_SECRET_ACCESS_KEY"
+	password      = "<<AWS_SECRET_ACCESS_KEY>>"
 	registry_server = "<<AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com>>"
   }
 }

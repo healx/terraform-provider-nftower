@@ -21,7 +21,7 @@ func New(version string) func() *schema.Provider {
 					Optional: true,
 					DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 						"NFTOWER_API_URL",
-					}, "https://api.tower.nf"),
+					}, "https://api.cloud.seqera.io"),
 				},
 				"api_key": {
 					Type:     schema.TypeString,
