@@ -215,14 +215,13 @@ func (c *TowerClient) UpdateCredentialsAWS(
 }
 
 func (c *TowerClient) UpdateCredentialsContainerRegistry(
-	ctx context.Context,	
+	ctx context.Context,
 	id string,
 	workspaceId string,
 	description string,
 	username string,
 	password string,
 	registryServer string) error {
-
 	payload := map[string]interface{}{
 		"credentials": map[string]interface{}{
 			"description": description,
