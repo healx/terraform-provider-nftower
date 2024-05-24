@@ -222,8 +222,10 @@ func (c *TowerClient) UpdateCredentialsContainerRegistry(
 	username string,
 	password string,
 	registryServer string) error {
+
 	payload := map[string]interface{}{
 		"credentials": map[string]interface{}{
+			"id":          id,
 			"description": description,
 			"provider":    "container-reg",
 			"keys": map[string]interface{}{
