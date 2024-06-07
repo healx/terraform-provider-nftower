@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/hashicorp/go-retryablehttp v0.7.7
-	github.com/hashicorp/terraform-plugin-docs v0.19.3
+	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 )
